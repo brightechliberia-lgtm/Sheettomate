@@ -1,0 +1,27 @@
+name: sheetomate
+region: nyc
+services:
+  - name: api
+    dockerfile_path: docker/Dockerfile.server.prod
+    http_port: 4000
+    instance_count: 2
+    instance_size_slug: basic-xs
+    health_check:
+      http_path: /api/health
+    envs:
+      - key: NODE_ENV
+        value: production
+  - name: web
+    dockerfile_path: docker/Dockerfile.client.prod
+    http_port: 80
+    instance_count: 2
+    routes:
+      - path: /
+databases:
+  - name: sheetomate-pg
+    engine: PG
+    version: "16"
+    production: true
+  - name: sheetomate-redis
+    engine: REDIS
+    version: "7"

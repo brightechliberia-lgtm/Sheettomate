@@ -1,0 +1,65 @@
+openapi: 3.0.3
+info:
+  title: Sheettomate API
+  version: 1.0.0
+  description: Marketplace, courses, payments (sandbox by default), community, and automations.
+servers:
+  - url: http://localhost:4000
+    description: Local
+  - url: https://staging.sheettomate.com
+    description: Staging
+  - url: https://api.sheettomate.com
+    description: Production
+paths:
+  /api/health:
+    get:
+      summary: Liveness
+      responses:
+        "200":
+          description: Process is up
+  /api/health/ready:
+    get:
+      summary: Readiness (Postgres)
+      responses:
+        "200":
+          description: Database reachable
+        "503":
+          description: Database down
+  /api/auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "200": { description: Access token and user }
+        "401": { description: Invalid credentials }
+  /api/templates:
+    get:
+      summary: Public catalog
+      responses:
+        "200": { description: Template list }
+  /api/v1:
+    get:
+      summary: Automation public API (API key)
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "401": { description: Missing or invalid key }
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: "Bearer smk_…"

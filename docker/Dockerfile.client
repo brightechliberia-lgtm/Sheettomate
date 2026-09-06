@@ -1,0 +1,17 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+COPY shared/package.json ./shared/
+COPY client/package.json ./client/
+
+RUN npm install
+
+COPY shared ./shared
+COPY client ./client
+
+WORKDIR /app/client
+EXPOSE 5173
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

@@ -1,0 +1,61 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [staging, production]
+        default: staging
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+
+jobs:
+  staging:
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Build and push
+        run: |
+          docker build -f docker/Dockerfile.server.prod -t ${{ secrets.REGISTRY }}/sheettomate-api:${{ github.sha }} .
+          docker build -f docker/Dockerfile.client.prod -t ${{ secrets.REGISTRY }}/sheetomate-web:${{ github.sha }} .
+          docker tag ${{ secrets.REGISTRY }}/sheettomate-api:${{ github.sha }} ${{ secrets.REGISTRY }}/sheettomate-api:staging
+          docker tag ${{ secrets.REGISTRY }}/sheetomate-web:${{ github.sha }} ${{ secrets.REGISTRY }}/sheetomate-web:staging
+          docker push ${{ secrets.REGISTRY }}/sheettomate-api:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY }}/sheetomate-web:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY }}/sheettomate-api:staging
+          docker push ${{ secrets.REGISTRY }}/sheetomate-web:staging
+      - name: Deploy staging (blue-green tag)
+        run: |
+          echo "Point staging ECS/DO service to ${{ github.sha }}"
+          echo "${{ github.sha }}" > image-tag.txt
+      - name: Smoke tests
+        run: bash scripts/smoke.sh ${{ secrets.STAGING_URL }}
+
+  production:
+    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'production'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Promote to production (blue-green)
+        run: |
+          echo "Keep current live task as rollback candidate"
+          echo "Shift production listener to images tagged ${{ github.sha }}"
+          echo "ECS: update-service with new task definition revision"
+          echo "DO App Platform: deploy same registry digest"
+      - name: Production health
+        run: bash scripts/smoke.sh ${{ secrets.PRODUCTION_URL }}
+      - name: Notify
+        run: echo "If smoke passed, send launch email and social posts"

@@ -1,0 +1,48 @@
+# Render Blueprint — Sheettomate API + Postgres
+# Dashboard: New → Blueprint → connect this repo
+# Docs: https://render.com/docs/blueprint-spec
+
+databases:
+  - name: sheettomate-db
+    plan: free
+    databaseName: sheetomate
+    user: sheetomate
+
+services:
+  - type: web
+    name: sheettomate-api
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: .
+    buildCommand: npm ci && npm run build -w shared && npm run prisma:generate -w server && npm run build -w server
+    startCommand: cd server && npx prisma migrate deploy && node dist/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sheettomate-db
+          property: connectionString
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      # Set these in the Render dashboard on first deploy:
+      # CLIENT_ORIGIN=https://sheettomate.com
+      # PUBLIC_API_URL=https://api.sheettomate.com  (or https://sheettomate-api.onrender.com until DNS is ready)
+      - key: CLIENT_ORIGIN
+        value: https://sheettomate.com
+      - key: PUBLIC_API_URL
+        value: https://api.sheettomate.com
+      - key: PAYMENTS_MODE
+        value: sandbox
+      - key: STORAGE_PROVIDER
+        value: local
+      - key: LOG_LEVEL
+        value: info
+      - key: FX_USD_LRD
+        value: "190"
+      # Optional — set in Render dashboard when ready:
+      # CLOUDINARY_*, SMTP_*, OPENAI_API_KEY, GOOGLE_CLIENT_ID, etc.

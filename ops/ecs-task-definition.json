@@ -1,0 +1,40 @@
+{
+  "family": "sheettomate-api",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "api",
+      "image": "ACCOUNT.dkr.ecr.REGION.amazonaws.com/sheettomate-api:SHA",
+      "portMappings": [{ "containerPort": 4000, "protocol": "tcp" }],
+      "essential": true,
+      "environment": [
+        { "name": "NODE_ENV", "value": "production" },
+        { "name": "PORT", "value": "4000" }
+      ],
+      "secrets": [
+        { "name": "DATABASE_URL", "valueFrom": "arn:aws:ssm:REGION:ACCOUNT:parameter/sheetomate/DATABASE_URL" },
+        { "name": "JWT_ACCESS_SECRET", "valueFrom": "arn:aws:ssm:REGION:ACCOUNT:parameter/sheetomate/JWT_ACCESS_SECRET" },
+        { "name": "JWT_REFRESH_SECRET", "valueFrom": "arn:aws:ssm:REGION:ACCOUNT:parameter/sheetomate/JWT_REFRESH_SECRET" },
+        { "name": "REDIS_URL", "valueFrom": "arn:aws:ssm:REGION:ACCOUNT:parameter/sheetomate/REDIS_URL" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/sheettomate-api",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:4000/api/health || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3
+      }
+    }
+  ]
+}

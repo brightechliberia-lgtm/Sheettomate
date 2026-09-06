@@ -1,0 +1,42 @@
+{
+  "info": {
+    "name": "Sheettomate",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "baseUrl", "value": "http://localhost:4000" }],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/health"
+      }
+    },
+    {
+      "name": "Ready",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/health/ready"
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"learner@sheettomate.com\",\n  \"password\": \"ChangeMe123!\"\n}"
+        },
+        "url": "{{baseUrl}}/api/auth/login"
+      }
+    },
+    {
+      "name": "Templates",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/templates"
+      }
+    }
+  ]
+}

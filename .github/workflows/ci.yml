@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sheetomate
+          POSTGRES_PASSWORD: sheetomate
+          POSTGRES_DB: sheetomate
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sheetomate -d sheetomate"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://sheetomate:sheetomate@localhost:5432/sheetomate?schema=public
+      JWT_ACCESS_SECRET: ci-access-secret-change-me-min-32-chars
+      JWT_REFRESH_SECRET: ci-refresh-secret-change-me-min-32-chars
+      CLIENT_ORIGIN: http://localhost:5173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w shared
+      - run: npm run db:generate
+      - run: npm exec -w @sheetomate/server -- prisma migrate deploy
+      - run: npm run lint
+      - run: npm test
+      - run: npm run test:api -w server
+      - run: npm run test -w client
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: build-logs
+          path: |
+            server/dist
+            client/dist
+
+  e2e:
+    needs: test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sheetomate
+          POSTGRES_PASSWORD: sheetomate
+          POSTGRES_DB: sheetomate
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sheetomate -d sheetomate"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://sheetomate:sheetomate@localhost:5432/sheetomate?schema=public
+      JWT_ACCESS_SECRET: ci-access-secret-change-me-min-32-chars
+      JWT_REFRESH_SECRET: ci-refresh-secret-change-me-min-32-chars
+      CLIENT_ORIGIN: http://localhost:5173
+      PAYMENTS_MODE: sandbox
+      CI: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w shared
+      - run: npm run db:generate
+      - run: npm exec -w @sheetomate/server -- prisma migrate deploy
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test

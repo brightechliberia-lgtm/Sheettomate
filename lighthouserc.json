@@ -1,0 +1,17 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["${LHCI_URL}"],
+      "numberOfRuns": 2
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.7 }],
+        "categories:accessibility": ["error", { "minScore": 0.85 }]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

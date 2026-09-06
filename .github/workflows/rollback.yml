@@ -1,0 +1,17 @@
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Previous image SHA/tag
+        required: true
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/rollback.sh ${{ inputs.image_tag }}
+      - run: bash scripts/smoke.sh ${{ secrets.PRODUCTION_URL }}
