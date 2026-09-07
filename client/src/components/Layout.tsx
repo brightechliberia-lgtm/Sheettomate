@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import BrandLogo from './BrandLogo';
-import ExploreMenu, { ExploreMobileLinks } from './ExploreMenu';
+import ExploreMenu from './ExploreMenu';
 import NotificationBell from './NotificationBell';
 import NewsletterForm from './NewsletterForm';
 import OfflineBanner from './OfflineBanner';

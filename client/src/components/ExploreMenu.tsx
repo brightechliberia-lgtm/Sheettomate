@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
-const SECTIONS = [
+type ExploreItem = { to: string; label: string };
+type ExploreSection = { title: string; items: ExploreItem[] };
+
+const SECTIONS: ExploreSection[] = [
   {
     title: 'Start here',
     items: [
@@ -27,7 +30,7 @@ const SECTIONS = [
       { to: '/contact', label: 'Contact' },
     ],
   },
-] as const;
+];
 
 const EXPLORE_PATHS = new Set([
   '/get-templates',
