@@ -23,7 +23,8 @@ COPY --from=build /app/shared ./shared
 COPY --from=build /app/server/dist ./server/dist
 COPY --from=build /app/server/prisma ./server/prisma
 COPY --from=build /app/server/package.json ./server/package.json
+COPY scripts/railway-start.sh /app/scripts/railway-start.sh
+RUN chmod +x /app/scripts/railway-start.sh
 WORKDIR /app/server
 EXPOSE 4000
-HEALTHCHECK --interval=20s --timeout=5s --retries=5 CMD wget -qO- http://127.0.0.1:${PORT:-4000}/api/health || exit 1
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
+CMD ["sh", "/app/scripts/railway-start.sh"]

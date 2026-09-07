@@ -12,13 +12,24 @@ function required(name: string, fallback?: string): string {
   return value;
 }
 
+const isProd = (process.env.NODE_ENV ?? 'development') === 'production';
+
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 4000),
   clientOrigin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173',
-  databaseUrl: required('DATABASE_URL', 'postgresql://sheetomate:sheetomate@localhost:5432/sheetomate?schema=public'),
-  jwtAccessSecret: required('JWT_ACCESS_SECRET', 'dev-access-secret-change-me-min-32-chars'),
-  jwtRefreshSecret: required('JWT_REFRESH_SECRET', 'dev-refresh-secret-change-me-min-32-chars'),
+  databaseUrl: required(
+    'DATABASE_URL',
+    isProd ? undefined : 'postgresql://sheetomate:sheetomate@localhost:5432/sheetomate?schema=public',
+  ),
+  jwtAccessSecret: required(
+    'JWT_ACCESS_SECRET',
+    isProd ? undefined : 'dev-access-secret-change-me-min-32-chars',
+  ),
+  jwtRefreshSecret: required(
+    'JWT_REFRESH_SECRET',
+    isProd ? undefined : 'dev-refresh-secret-change-me-min-32-chars',
+  ),
   jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
   storageProvider: (process.env.STORAGE_PROVIDER ?? 'local') as 's3' | 'cloudinary' | 'local',

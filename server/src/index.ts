@@ -14,8 +14,9 @@ async function main() {
   const server = createServer(app);
   attachRealtime(server);
 
-  server.listen(env.port, () => {
-    logger.info(`Sheettomate API listening on port ${env.port}`);
+  // Bind all interfaces so Railway/Docker healthchecks can reach the process.
+  server.listen(env.port, '0.0.0.0', () => {
+    logger.info(`Sheettomate API listening on 0.0.0.0:${env.port}`);
   });
 }
 
