@@ -93,7 +93,7 @@ export const env = {
 
 export const isProduction = env.nodeEnv === 'production';
 
-/** localhost and 127.0.0.1 are different browser origins; allow both in local/dev. */
+/** localhost/127.0.0.1 and apex/www are different browser origins; allow both pairs. */
 export function allowedClientOrigins(): string[] {
   const primary = env.clientOrigin;
   const list = [primary];
@@ -104,6 +104,12 @@ export function allowedClientOrigins(): string[] {
       list.push(url.origin);
     } else if (url.hostname === '127.0.0.1') {
       url.hostname = 'localhost';
+      list.push(url.origin);
+    } else if (url.hostname.startsWith('www.')) {
+      url.hostname = url.hostname.slice(4);
+      list.push(url.origin);
+    } else if (url.hostname.includes('.')) {
+      url.hostname = `www.${url.hostname}`;
       list.push(url.origin);
     }
   } catch {
