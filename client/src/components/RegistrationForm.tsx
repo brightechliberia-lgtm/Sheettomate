@@ -8,7 +8,7 @@ const initialErrors: Record<string, string> = {};
 export default function RegistrationForm({
   onSuccess,
 }: {
-  onSuccess: (result: { email: string; verifyUrl?: string }) => void;
+  onSuccess: (result: { email: string; verifyUrl?: string; emailDelivery?: string }) => void;
 }) {
   const { register } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>(initialErrors);
@@ -46,7 +46,11 @@ export default function RegistrationForm({
     setPending(true);
     try {
       const result = await register(payload);
-      onSuccess({ email: payload.email, verifyUrl: result.verifyUrl });
+      onSuccess({
+        email: payload.email,
+        verifyUrl: result.verifyUrl,
+        emailDelivery: result.emailDelivery,
+      });
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
