@@ -1,6 +1,16 @@
+import { createRequire } from 'module';
 import { PrismaClient, Role, CourseLevel } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { DEFAULT_PROMPT_TEMPLATES } from '../src/ai/prompts';
+
+// Production image ships dist/ only; local seed still uses src/ via tsx.
+const require = createRequire(__filename);
+const { DEFAULT_PROMPT_TEMPLATES } = (() => {
+  try {
+    return require('../dist/ai/prompts') as typeof import('../src/ai/prompts');
+  } catch {
+    return require('../src/ai/prompts') as typeof import('../src/ai/prompts');
+  }
+})();
 
 const prisma = new PrismaClient();
 
