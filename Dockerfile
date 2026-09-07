@@ -1,4 +1,4 @@
-# Sheettomate API — production image (kept in sync with root Dockerfile)
+# Sheettomate API — Railway / production image (monorepo root)
 FROM node:22-alpine AS deps
 WORKDIR /app
 RUN apk add --no-cache openssl libc6-compat
@@ -25,4 +25,5 @@ COPY --from=build /app/server/prisma ./server/prisma
 COPY --from=build /app/server/package.json ./server/package.json
 WORKDIR /app/server
 EXPOSE 4000
+HEALTHCHECK --interval=20s --timeout=5s --retries=5 CMD wget -qO- http://127.0.0.1:${PORT:-4000}/api/health || exit 1
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
