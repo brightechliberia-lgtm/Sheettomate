@@ -71,19 +71,31 @@ export async function register(req: Request, res: Response, next: NextFunction) 
     const token = await issueAuthToken(user.id, AuthTokenType.EMAIL_VERIFICATION, VERIFY_TTL_MS);
     const origin = appOriginFromRequest(req.headers.origin);
     const verifyUrl = `${origin}/verify-email?token=${token}`;
-    await sendWelcomeEmail(user.email, user.name, verifyUrl);
+
+    let emailDelivery: 'smtp' | 'link' | 'smtp_failed' = emailsDeliveredViaSmtp() ? 'smtp' : 'link';
+    try {
+      await sendWelcomeEmail(user.email, user.name, verifyUrl);
+    } catch (mailError) {
+      emailDelivery = 'smtp_failed';
+      logger.error('Welcome email failed after registration; returning verify link', {
+        userId: user.id,
+        error: mailError instanceof Error ? mailError.message : String(mailError),
+      });
+    }
 
     return sendSuccess(
       res,
       {
         user: toPublicUser(user),
-        verifyUrl: emailsDeliveredViaSmtp() ? undefined : verifyUrl,
-        emailDelivery: emailsDeliveredViaSmtp() ? 'smtp' : 'link',
+        verifyUrl: emailDelivery === 'smtp' ? undefined : verifyUrl,
+        emailDelivery,
       },
       201,
-      emailsDeliveredViaSmtp()
+      emailDelivery === 'smtp'
         ? 'Account created. Check your email to verify before logging in.'
-        : 'Account created. SMTP is not configured, so use the verification link on this page.',
+        : emailDelivery === 'smtp_failed'
+          ? 'Account created, but email could not be sent. Use the verification link on this page.'
+          : 'Account created. SMTP is not configured, so use the verification link on this page.',
     );
   } catch (error) {
     next(error);
@@ -194,15 +206,28 @@ export async function resendVerification(req: Request, res: Response, next: Next
       const token = await issueAuthToken(user.id, AuthTokenType.EMAIL_VERIFICATION, VERIFY_TTL_MS);
       const origin = appOriginFromRequest(req.headers.origin);
       const verifyUrl = `${origin}/verify-email?token=${token}`;
-      await sendWelcomeEmail(user.email, user.name, verifyUrl);
-      return sendSuccess(
-        res,
-        { sent: true, verifyUrl: emailsDeliveredViaSmtp() ? undefined : verifyUrl },
-        200,
-        emailsDeliveredViaSmtp()
-          ? 'If that account exists, a verification email was sent.'
-          : 'SMTP is not configured. Use the verification link below.',
-      );
+      try {
+        await sendWelcomeEmail(user.email, user.name, verifyUrl);
+        return sendSuccess(
+          res,
+          { sent: true, verifyUrl: emailsDeliveredViaSmtp() ? undefined : verifyUrl },
+          200,
+          emailsDeliveredViaSmtp()
+            ? 'If that account exists, a verification email was sent.'
+            : 'SMTP is not configured. Use the verification link below.',
+        );
+      } catch (mailError) {
+        logger.error('Resend verification email failed', {
+          email,
+          error: mailError instanceof Error ? mailError.message : String(mailError),
+        });
+        return sendSuccess(
+          res,
+          { sent: false, verifyUrl },
+          200,
+          'Email could not be sent. Use the verification link below.',
+        );
+      }
     } else {
       logger.info('Verification resend skipped', { email });
     }

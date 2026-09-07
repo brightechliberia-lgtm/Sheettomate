@@ -14,11 +14,22 @@ function createTransport() {
     return nodemailer.createTransport({ jsonTransport: true });
   }
 
+  const port = env.smtpPort;
+  const secure = env.smtpSecure || port === 465;
   const options: SMTPTransport.Options = {
     host: env.smtpHost,
-    port: env.smtpPort,
-    secure: env.smtpSecure,
+    port,
+    secure,
+    requireTLS: !secure && port === 587,
     auth: env.smtpUser ? { user: env.smtpUser, pass: env.smtpPass } : undefined,
+    connectionTimeout: 20_000,
+    greetingTimeout: 20_000,
+    socketTimeout: 30_000,
+    tls: {
+      servername: env.smtpHost,
+      minVersion: 'TLSv1.2',
+      rejectUnauthorized: !env.smtpTlsInsecure,
+    },
   };
   return nodemailer.createTransport(options);
 }
@@ -30,22 +41,33 @@ export function emailsDeliveredViaSmtp(): boolean {
 }
 
 async function sendMail(to: string, subject: string, html: string): Promise<void> {
-  const info = await transport.sendMail({ from, to, subject, html });
-  if (!env.smtpHost) {
-    await fs.mkdir(outboxDir, { recursive: true });
-    await fs.appendFile(
-      outboxFile,
-      `${JSON.stringify({ at: new Date().toISOString(), to, subject, html })}\n`,
-      'utf8',
-    );
-    logger.info('Email captured locally (SMTP not configured). Use the on-screen verification link.', {
+  try {
+    const info = await transport.sendMail({ from, to, subject, html });
+    if (!env.smtpHost) {
+      await fs.mkdir(outboxDir, { recursive: true });
+      await fs.appendFile(
+        outboxFile,
+        `${JSON.stringify({ at: new Date().toISOString(), to, subject, html })}\n`,
+        'utf8',
+      );
+      logger.info('Email captured locally (SMTP not configured). Use the on-screen verification link.', {
+        to,
+        subject,
+        outbox: outboxFile,
+      });
+      return;
+    }
+    logger.info('Email sent', { to, subject, messageId: info.messageId });
+  } catch (error) {
+    logger.error('SMTP send failed', {
       to,
       subject,
-      outbox: outboxFile,
+      host: env.smtpHost,
+      port: env.smtpPort,
+      error: error instanceof Error ? error.message : String(error),
     });
-    return;
+    throw error;
   }
-  logger.info('Email sent', { to, subject, messageId: info.messageId });
 }
 
 function layout(title: string, body: string): string {

@@ -48,6 +48,8 @@ export const env = {
   smtpPass: process.env.SMTP_PASS ?? '',
   smtpFrom: process.env.SMTP_FROM ?? 'Sheettomate <noreply@sheettomate.com>',
   smtpSecure: process.env.SMTP_SECURE === 'true',
+  /** Set SMTP_TLS_INSECURE=true only for shared hosts with mismatched cert CN (e.g. some cPanel setups). */
+  smtpTlsInsecure: process.env.SMTP_TLS_INSECURE === 'true',
   redisUrl: process.env.REDIS_URL ?? '',
   cdnBaseUrl: (process.env.CDN_BASE_URL ?? '').replace(/\/$/, ''),
   openaiApiKey: process.env.OPENAI_API_KEY ?? '',
