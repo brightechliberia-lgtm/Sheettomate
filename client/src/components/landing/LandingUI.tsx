@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
-import { CornerFloral, DotGrid, FloralDivider, SectionMesh, WaveDivider } from './LandingDecor';
+import { FloralDivider, SectionMesh } from './LandingDecor';
 import { Reveal } from './Reveal';
 
 export type SectionTone = 'white' | 'mint' | 'slate' | 'cream' | 'sky' | 'brand';
@@ -50,10 +50,7 @@ export function SectionHeading({
 export function StatBand({ stats }: { stats: { n: string; l: string }[] }) {
   const { ref, visible } = useScrollReveal();
   return (
-    <section className="relative border-y border-accent-100 overflow-hidden bg-gradient-to-r from-accent-50 via-white to-accent-50">
-      <DotGrid />
-      <CornerFloral className="absolute -top-4 left-4 hidden sm:block" />
-      <CornerFloral className="absolute -bottom-4 right-4 rotate-180 hidden sm:block" />
+    <section className="relative border-y border-stone-200 overflow-hidden bg-stone-50">
       <div
         ref={ref as never}
         className={`relative mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center motion-safe:transition-all motion-safe:duration-700 ${
@@ -140,30 +137,27 @@ export function CtaBand({
   secondary?: { label: string; to: string };
 }) {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-950 text-white px-4 sm:px-6 py-14 sm:py-20">
-      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_15%_50%,#00a651,transparent_42%),radial-gradient(circle_at_85%_30%,#121722,transparent_38%)]" />
-      <DotGrid className="opacity-20 !text-white" />
+    <section className="relative overflow-hidden bg-brand-700 text-white px-4 sm:px-6 py-14 sm:py-20">
       <Reveal className="relative mx-auto max-w-3xl text-center">
         <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold">{title}</h2>
-        {subtitle && <p className="mt-4 text-white/85 text-base sm:text-lg max-w-xl mx-auto">{subtitle}</p>}
+        {subtitle && <p className="mt-4 text-white text-base sm:text-lg max-w-xl mx-auto opacity-95">{subtitle}</p>}
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link
             to={primary.to}
-            className="rounded-full bg-accent-500 px-6 sm:px-8 py-3 sm:py-3.5 text-sm sm:text-base font-bold text-white shadow-lg shadow-accent-900/30 hover:bg-accent-600 motion-safe:transition"
+            className="rounded-full bg-white px-6 sm:px-8 py-3 sm:py-3.5 text-sm sm:text-base font-bold text-brand-800 shadow-lg hover:bg-brand-50 motion-safe:transition"
           >
             {primary.label}
           </Link>
           {secondary && (
             <Link
               to={secondary.to}
-              className="rounded-full border-2 border-white/40 px-6 sm:px-8 py-3 sm:py-3.5 text-sm sm:text-base font-semibold hover:bg-white/10 motion-safe:transition"
+              className="rounded-full border-2 border-white px-6 sm:px-8 py-3 sm:py-3.5 text-sm sm:text-base font-semibold text-white hover:bg-white/10 motion-safe:transition"
             >
               {secondary.label}
             </Link>
           )}
         </div>
       </Reveal>
-      <WaveDivider flip className="absolute bottom-0 left-0 right-0 text-white opacity-10" />
     </section>
   );
 }
@@ -196,9 +190,7 @@ export function ContentSection({
       ref={reveal ? (ref as never) : undefined}
       className={`relative overflow-hidden border-y ${toneBorder[resolvedTone]} ${className}`}
     >
-      {waveTop && <WaveDivider className="text-inherit absolute top-0 left-0 right-0 -translate-y-px z-10" />}
       <SectionMesh tone={resolvedTone} />
-      <DotGrid className="opacity-20" />
       <div
         className={`relative motion-safe:transition-all motion-safe:duration-700 motion-safe:ease-out ${
           !reveal || visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
@@ -206,7 +198,6 @@ export function ContentSection({
       >
         {children}
       </div>
-      {waveBottom && <WaveDivider flip className="text-inherit" />}
     </section>
   );
 
@@ -215,7 +206,7 @@ export function ContentSection({
 
 export function LandingPageRoot({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50/50 via-white to-accent-50/20 overflow-x-hidden">{children}</div>
+    <div className="min-h-screen bg-white overflow-x-hidden">{children}</div>
   );
 }
 

@@ -157,56 +157,58 @@ export default function Layout({ children }: { children: ReactNode }) {
         )}
         {children}
       </main>
-      <footer className="bg-accent-950 text-white">
-        <div className="h-1.5 w-full bg-brand-500" />
+      <footer className="border-t border-stone-200 bg-stone-50 text-accent-900">
+        <div className="h-1 w-full bg-brand-500" />
         <div className="mx-auto max-w-6xl px-4 py-12 grid md:grid-cols-4 gap-10 text-sm">
           <div>
             <BrandLogo size="lg" />
-            <p className="mt-3 text-white/75 leading-relaxed">Get templates, build your own, and learn — for Liberia and West Africa.</p>
+            <p className="mt-3 text-accent-700 leading-relaxed">
+              Get templates, build your own, and learn — for Liberia and West Africa.
+            </p>
           </div>
           <div className="grid gap-2">
-            <p className="font-semibold text-white tracking-wide text-xs uppercase">Explore</p>
-            <Link to="/get-templates" className="text-white/80 hover:text-white">
+            <p className="font-semibold text-accent-900 tracking-wide text-xs uppercase">Explore</p>
+            <Link to="/get-templates" className="text-accent-700 hover:text-brand-700">
               Get templates
             </Link>
-            <Link to="/build" className="text-white/80 hover:text-white">
+            <Link to="/build" className="text-accent-700 hover:text-brand-700">
               Build your own template
             </Link>
-            <Link to="/learn" className="text-white/80 hover:text-white">
+            <Link to="/learn" className="text-accent-700 hover:text-brand-700">
               Learn
             </Link>
-            <Link to="/categories" className="text-white/80 hover:text-white">
+            <Link to="/categories" className="text-accent-700 hover:text-brand-700">
               Categories
             </Link>
           </div>
           <div className="grid gap-2">
-            <p className="font-semibold text-white tracking-wide text-xs uppercase">Company</p>
-            <Link to="/about" className="text-white/80 hover:text-white">
+            <p className="font-semibold text-accent-900 tracking-wide text-xs uppercase">Company</p>
+            <Link to="/about" className="text-accent-700 hover:text-brand-700">
               About
             </Link>
-            <Link to="/contact" className="text-white/80 hover:text-white">
+            <Link to="/contact" className="text-accent-700 hover:text-brand-700">
               Contact
             </Link>
-            <Link to="/blog" className="text-white/80 hover:text-white">
+            <Link to="/blog" className="text-accent-700 hover:text-brand-700">
               Blog
             </Link>
-            <Link to="/pricing" className="text-white/80 hover:text-white">
+            <Link to="/pricing" className="text-accent-700 hover:text-brand-700">
               Pricing
             </Link>
           </div>
           <div>
-            <p className="font-semibold text-white tracking-wide text-xs uppercase">Newsletter</p>
-            <p className="mt-1 mb-3 text-xs text-white/70">Tips, new templates, course drops.</p>
-            <NewsletterForm source="newsletter" onDark />
+            <p className="font-semibold text-accent-900 tracking-wide text-xs uppercase">Newsletter</p>
+            <p className="mt-1 mb-3 text-xs text-accent-600">Tips, new templates, course drops.</p>
+            <NewsletterForm source="newsletter" />
           </div>
         </div>
-        <div className="border-t border-white/10 mx-auto max-w-6xl px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-center text-xs text-white/55">© {new Date().getFullYear()} Sheettomate</p>
+        <div className="border-t border-stone-200 mx-auto max-w-6xl px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-center text-xs text-accent-600">© {new Date().getFullYear()} Sheettomate</p>
           <a
             href="https://brightechliberia.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-accent-800 hover:bg-brand-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-accent-800 hover:border-brand-400 hover:bg-brand-50"
           >
             <span>Powered by</span>
             <img src="/brightech-logo.png" alt="Brightech Liberia" className="h-7 w-auto object-contain" />

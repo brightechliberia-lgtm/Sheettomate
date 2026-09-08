@@ -308,8 +308,7 @@ export default function HomePage() {
       <ContentSection tone="white" className="py-14 sm:py-16 px-4 sm:px-6">
         <div className="landing-container">
           <Reveal>
-          <div className="relative rounded-3xl border border-accent-200/60 bg-white/90 backdrop-blur p-6 sm:p-10 md:p-12 grid md:grid-cols-2 gap-8 sm:gap-10 items-center overflow-hidden shadow-xl">
-            <div className="absolute -top-20 -right-20 h-48 w-48 rounded-full bg-accent-200/40 blur-3xl" aria-hidden />
+          <div className="relative rounded-3xl border border-stone-200 bg-white p-6 sm:p-10 md:p-12 grid md:grid-cols-2 gap-8 sm:gap-10 items-center overflow-hidden shadow-xl">
             <div>
               <h2 className="font-display text-3xl font-bold text-brand-800">Train your team</h2>
               <p className="mt-4 text-stone-600 leading-relaxed">

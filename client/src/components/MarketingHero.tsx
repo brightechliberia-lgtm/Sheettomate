@@ -1,6 +1,6 @@
 import type { FormEvent, ReactNode } from 'react';
 import PillarNav, { type PillarId } from './PillarNav';
-import { HeroOrnaments, SectionGlow, WaveDivider } from './landing/LandingDecor';
+import { SectionGlow } from './landing/LandingDecor';
 
 export default function MarketingHero({
   title,
@@ -33,13 +33,7 @@ export default function MarketingHero({
       } ${compact ? 'pt-10 pb-16 sm:pt-12 sm:pb-20' : 'pt-12 pb-20 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28'}`}
     >
       {!isNavy && <SectionGlow tone={glowTone} />}
-      {!isNavy && <HeroOrnaments />}
-      {isNavy && (
-        <div
-          className="pointer-events-none absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_20%_80%,#00a651,transparent_45%),radial-gradient(circle_at_80%_20%,#121722,transparent_40%)]"
-          aria-hidden
-        />
-      )}
+      {isNavy && <div className="pointer-events-none absolute inset-0 bg-brand-800" aria-hidden />}
       <div className={`relative mx-auto max-w-6xl px-4 sm:px-6 ${centered ? 'text-center' : ''}`}>
         {pillar && (
           <div className={`mb-6 sm:mb-8 motion-safe:animate-fade-up ${centered ? 'flex justify-center' : ''}`}>
@@ -78,7 +72,6 @@ export default function MarketingHero({
           </div>
         )}
       </div>
-      <WaveDivider className={`absolute bottom-0 left-0 right-0 ${isNavy ? 'text-slate-50' : 'text-white'}`} />
     </section>
   );
 }
@@ -109,7 +102,7 @@ export function CatalogSearch({
       />
       <button
         type="submit"
-        className="shrink-0 bg-gradient-to-r from-accent-600 to-brand-700 px-6 sm:px-8 py-3.5 text-sm font-bold text-white hover:from-accent-700 hover:to-brand-800 motion-safe:transition"
+        className="shrink-0 bg-brand-600 px-6 sm:px-8 py-3.5 text-sm font-bold text-white hover:bg-brand-700 motion-safe:transition"
       >
         {buttonLabel}
       </button>

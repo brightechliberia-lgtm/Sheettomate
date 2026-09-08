@@ -81,7 +81,7 @@ export default function CourseDetailPage() {
 
       <section className="relative overflow-hidden border-b">
         <div className="absolute inset-0 bg-brand-900" />
-        <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_20%_30%,#00a651,transparent_40%),radial-gradient(circle_at_80%_0%,#00753a,transparent_45%)]" />
+        <div className="absolute inset-0 bg-brand-800" aria-hidden />
         <div className="relative mx-auto max-w-6xl px-4 py-10 md:py-14 grid md:grid-cols-[1.4fr_1fr] gap-8 items-center">
           <div className="text-white">
             <p className="text-xs font-bold uppercase tracking-widest text-brand-600">{course.level} course</p>
