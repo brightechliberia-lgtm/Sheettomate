@@ -8,7 +8,7 @@ export function FloralDivider({ className = '' }: { className?: string }) {
   return <div className={`h-px w-16 mx-auto bg-stone-200 ${className}`} aria-hidden />;
 }
 
-export function CornerFloral({ className = '' }: { className?: string }) {
+export function CornerFloral(_props: { className?: string }) {
   return null;
 }
 

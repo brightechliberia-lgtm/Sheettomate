@@ -169,8 +169,8 @@ export function ContentSection({
   className = '',
   id,
   reveal = true,
-  waveTop = false,
-  waveBottom = false,
+  waveTop: _waveTop = false,
+  waveBottom: _waveBottom = false,
 }: {
   children: ReactNode;
   alt?: boolean;
