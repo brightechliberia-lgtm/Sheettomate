@@ -25,12 +25,16 @@
     "db:migrate": "npm run prisma:migrate -w server",
     "db:migrate:deploy": "npm run prisma:migrate:deploy -w server",
     "db:seed": "npm run prisma:seed -w server",
+    "build:frontend": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/build-frontend-prod.ps1 -ApiUrl https://api.sheettomate.com/api",
+    "deploy:frontend": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/deploy-frontend.ps1",
+    "deploy:frontend:upload": "node ./scripts/deploy-frontend-ftp.mjs",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:prod": "docker compose -f docker-compose.prod.yml up -d --build"
   },
   "devDependencies": {
     "@playwright/test": "^1.51.0",
+    "basic-ftp": "^6.2.1",
     "concurrently": "^9.1.2",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"

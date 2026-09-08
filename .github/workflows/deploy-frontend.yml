@@ -1,0 +1,59 @@
+name: Deploy frontend (Namecheap)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "client/**"
+      - "shared/**"
+      - "scripts/build-frontend-prod.ps1"
+      - "scripts/deploy-frontend-ftp.mjs"
+      - ".github/workflows/deploy-frontend.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build shared + client
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://api.sheettomate.com/api' }}
+        run: |
+          npm run build -w shared
+          npm run build -w client
+          mkdir -p deploy/frontend
+          cp -r client/dist/* deploy/frontend/
+          printf '%s\n' \
+            'RewriteEngine On' \
+            'RewriteBase /' \
+            'RewriteRule ^index\.html$ - [L]' \
+            'RewriteCond %{REQUEST_FILENAME} !-f' \
+            'RewriteCond %{REQUEST_FILENAME} !-d' \
+            'RewriteRule . /index.html [L]' \
+            > deploy/frontend/.htaccess
+
+      - name: Upload to public_html
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          local-dir: ./deploy/frontend/
+          server-dir: ${{ secrets.FTP_REMOTE_DIR || 'public_html/' }}
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/cgi-bin/**
+            **/.well-known/**
