@@ -1,8 +1,7 @@
 # Build production frontend and upload to Namecheap public_html via FTP.
 #
 # Setup (once):
-#   copy .env.deploy.example .env.deploy
-#   # fill FTP_HOST, FTP_USER, FTP_PASS (from cPanel → FTP Accounts)
+#   Edit env.deploy in the project root (FTP_HOST / FTP_USER / FTP_PASS)
 #
 # Usage:
 #   .\scripts\deploy-frontend.ps1
@@ -18,9 +17,12 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 Set-Location $root
 
-$deployEnv = Join-Path $root ".env.deploy"
+$deployEnv = Join-Path $root "env.deploy"
 if (-not (Test-Path $deployEnv)) {
-  Write-Host "Missing .env.deploy — copy from .env.deploy.example and add FTP credentials." -ForegroundColor Red
+  $deployEnv = Join-Path $root ".env.deploy"
+}
+if (-not (Test-Path $deployEnv)) {
+  Write-Host "Missing env.deploy — create it from .env.deploy.example and add FTP credentials." -ForegroundColor Red
   exit 1
 }
 

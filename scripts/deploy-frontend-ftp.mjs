@@ -39,6 +39,7 @@ async function loadEnvFile(filePath) {
   }
 }
 
+await loadEnvFile(path.join(root, 'env.deploy'));
 await loadEnvFile(path.join(root, '.env.deploy'));
 
 const host = process.env.FTP_HOST;
@@ -49,7 +50,8 @@ const remoteDir = (process.env.FTP_REMOTE_DIR || 'public_html').replace(/^\/+|\/
 const localDir = path.join(root, 'deploy', 'frontend');
 
 if (!host || !user || !pass) {
-  console.error('Missing FTP_HOST / FTP_USER / FTP_PASS. Copy .env.deploy.example → .env.deploy');
+  console.error('Missing FTP_HOST / FTP_USER / FTP_PASS.');
+  console.error('Edit env.deploy in the project root (copy from .env.deploy.example if needed).');
   process.exit(1);
 }
 
