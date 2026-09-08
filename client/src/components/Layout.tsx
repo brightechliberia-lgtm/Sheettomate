@@ -86,7 +86,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <NavLink
         to="/register"
         onClick={() => setOpen(false)}
-        className="rounded-full bg-gold px-4 py-2 text-sm font-semibold text-white text-center"
+        className="rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white text-center"
       >
         Sign up
       </NavLink>
@@ -108,8 +108,8 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <BrandLogo size="xl" />
-            <p className="hidden sm:block text-xs sm:text-sm font-semibold text-brand-900 leading-snug max-w-[14rem] lg:max-w-[18rem]">
-              Automate Sheets. Save Time. Get More Done
+            <p className="hidden sm:block text-xs sm:text-sm font-semibold text-accent-800 leading-snug max-w-[14rem] lg:max-w-[18rem]">
+              Automate Sheets. Save Time. Grow Faster.
             </p>
           </div>
           <div className="hidden sm:flex items-center gap-2">
@@ -157,8 +157,8 @@ export default function Layout({ children }: { children: ReactNode }) {
         )}
         {children}
       </main>
-      <footer className="bg-brand-950 text-white">
-        <div className="h-2 w-full bg-[repeating-linear-gradient(90deg,#BF0A30_0_24px,#ffffff_24px_48px,#002868_48px_72px)]" />
+      <footer className="bg-accent-950 text-white">
+        <div className="h-1.5 w-full bg-brand-500" />
         <div className="mx-auto max-w-6xl px-4 py-12 grid md:grid-cols-4 gap-10 text-sm">
           <div>
             <BrandLogo size="lg" />
@@ -200,7 +200,18 @@ export default function Layout({ children }: { children: ReactNode }) {
             <NewsletterForm source="newsletter" onDark />
           </div>
         </div>
-        <p className="text-center text-xs pb-6 text-white/55">© {new Date().getFullYear()} Sheettomate · Liberia: blue, red, and white</p>
+        <div className="border-t border-white/10 mx-auto max-w-6xl px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-center text-xs text-white/55">© {new Date().getFullYear()} Sheettomate</p>
+          <a
+            href="https://brightechliberia.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-accent-800 hover:bg-brand-50"
+          >
+            <span>Powered by</span>
+            <img src="/brightech-logo.png" alt="Brightech Liberia" className="h-7 w-auto object-contain" />
+          </a>
+        </div>
       </footer>
       <MobileTabBar />
     </div>

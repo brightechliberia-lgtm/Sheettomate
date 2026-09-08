@@ -16,7 +16,7 @@ export default function InstallPrompt() {
   return (
     <button
       type="button"
-      className="text-xs font-semibold rounded-full bg-gold px-3 py-1 text-white"
+      className="text-xs font-semibold rounded-full bg-brand-600 px-3 py-1 text-white"
       onClick={() => void event.prompt().then(() => setEvent(null))}
     >
       Install app

@@ -36,7 +36,7 @@ export default function MarketingHero({
       {!isNavy && <HeroOrnaments />}
       {isNavy && (
         <div
-          className="pointer-events-none absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_20%_80%,#0d9488,transparent_45%),radial-gradient(circle_at_80%_20%,#BF0A30,transparent_40%)]"
+          className="pointer-events-none absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_20%_80%,#00a651,transparent_45%),radial-gradient(circle_at_80%_20%,#121722,transparent_40%)]"
           aria-hidden
         />
       )}

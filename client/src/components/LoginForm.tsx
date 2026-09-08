@@ -51,10 +51,10 @@ export default function LoginForm() {
         />
       </label>
       {googleHint === 'off' && (
-        <p className="text-sm text-gold">Google sign-in is not configured on the server yet.</p>
+        <p className="text-sm text-brand-600">Google sign-in is not configured on the server yet.</p>
       )}
-      {googleHint === 'denied' && <p className="text-sm text-gold">Google sign-in was cancelled.</p>}
-      {googleHint === 'invalid' && <p className="text-sm text-gold">Google sign-in could not be completed. Try email login.</p>}
+      {googleHint === 'denied' && <p className="text-sm text-brand-600">Google sign-in was cancelled.</p>}
+      {googleHint === 'invalid' && <p className="text-sm text-brand-600">Google sign-in could not be completed. Try email login.</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button
         type="submit"

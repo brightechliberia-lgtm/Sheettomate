@@ -35,7 +35,7 @@ export default function AutomationsPage() {
           <p className="text-white/80 mt-1">Connect spreadsheets to email, SMS, Slack, WhatsApp, Drive, CRM, and QuickBooks.</p>
         </div>
         <nav className="flex flex-wrap gap-3 text-sm font-semibold">
-          <Link to="/automations/new" className="rounded-full bg-gold px-4 py-2 text-white">
+          <Link to="/automations/new" className="rounded-full bg-brand-600 px-4 py-2 text-white">
             New workflow
           </Link>
           <Link to="/automations/webhooks" className="rounded-full border border-white/40 px-4 py-2">

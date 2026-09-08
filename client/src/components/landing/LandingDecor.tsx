@@ -5,7 +5,7 @@ export function HeroOrnaments() {
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
       <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-accent-200/40 blur-3xl animate-float" />
       <div className="absolute top-0 right-0 h-[28rem] w-[28rem] rounded-full bg-brand-200/30 blur-3xl" />
-      <div className="absolute bottom-0 left-1/4 h-64 w-64 rounded-full bg-[#BF0A30]/8 blur-3xl" />
+      <div className="absolute bottom-0 left-1/4 h-64 w-64 rounded-full bg-[#00a651]/8 blur-3xl" />
       <div
         className="absolute inset-0 opacity-[0.35]"
         style={{

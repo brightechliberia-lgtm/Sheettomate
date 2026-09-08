@@ -77,7 +77,7 @@ export default function ContactPage() {
 
           <Reveal variant="right" delay={100}>
             <form onSubmit={submit} className="relative rounded-2xl border border-stone-200/80 bg-white/95 backdrop-blur p-6 sm:p-8 shadow-xl h-fit space-y-4">
-              <div className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl bg-gradient-to-r from-accent-500 via-brand-600 to-[#BF0A30]" aria-hidden />
+              <div className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl bg-gradient-to-r from-accent-500 via-brand-600 to-[#00a651]" aria-hidden />
               <h2 className="font-display text-xl font-bold text-brand-800">Send a message</h2>
               <input name="name" placeholder="Your name" className="w-full rounded-xl border border-stone-200 px-4 py-2.5 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition" />
               <input name="email" type="email" required placeholder="Email" className="w-full rounded-xl border border-stone-200 px-4 py-2.5 focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 outline-none transition" />

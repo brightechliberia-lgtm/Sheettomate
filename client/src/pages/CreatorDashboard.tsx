@@ -62,7 +62,7 @@ export default function CreatorDashboard() {
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">Creator dashboard</h1>
       {user && user.role !== 'CREATOR' && user.role !== 'ADMIN' && (
-        <div className="rounded-xl border border-gold/40 bg-white p-4">
+        <div className="rounded-xl border border-brand-500/40 bg-white p-4">
           <p className="text-sm text-stone-700">Template uploads are for creator accounts.</p>
           <button
             type="button"

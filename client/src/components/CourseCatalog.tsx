@@ -122,7 +122,7 @@ export default function CourseCatalog({ showSearch = true }: { showSearch?: bool
               )}
             </div>
             <div className="p-5">
-              {c.featured && <p className="text-xs font-semibold uppercase text-gold">Featured</p>}
+              {c.featured && <p className="text-xs font-semibold uppercase text-brand-600">Featured</p>}
               <p className="text-xs font-bold uppercase text-brand-600">{c.level}</p>
               <h3 className="mt-1 font-display text-lg font-bold group-hover:text-brand-700">{c.title}</h3>
               <p className="mt-2 text-sm text-stone-600 line-clamp-2">{c.description}</p>

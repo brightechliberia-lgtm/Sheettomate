@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#14532d"/>
-  <text x="256" y="330" text-anchor="middle" font-size="260" font-family="Arial, sans-serif" font-weight="800" fill="#fbbf24">S</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Sheettomate">
+  <rect width="512" height="512" rx="96" fill="#00a651"/>
+  <rect x="112" y="128" width="288" height="224" rx="20" fill="#fff"/>
+  <path d="M112 208h288M112 272h288M208 128v224M304 128v224" stroke="#00a651" stroke-width="12" opacity="0.5"/>
+  <path d="M256 352v72M216 392l40 56 40-56" fill="none" stroke="#fff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

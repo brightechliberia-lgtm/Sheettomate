@@ -13,7 +13,7 @@ export default function BackButton() {
         }
         navigate('/');
       }}
-      className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-gold"
+      className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:text-brand-600"
     >
       ← Back
     </button>

@@ -141,7 +141,7 @@ export function CtaBand({
 }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-950 text-white px-4 sm:px-6 py-14 sm:py-20">
-      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_15%_50%,#0d9488,transparent_42%),radial-gradient(circle_at_85%_30%,#BF0A30,transparent_38%)]" />
+      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_15%_50%,#00a651,transparent_42%),radial-gradient(circle_at_85%_30%,#121722,transparent_38%)]" />
       <DotGrid className="opacity-20 !text-white" />
       <Reveal className="relative mx-auto max-w-3xl text-center">
         <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold">{title}</h2>

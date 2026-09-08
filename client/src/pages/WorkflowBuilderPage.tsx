@@ -144,7 +144,7 @@ export default function WorkflowBuilderPage() {
     <form onSubmit={(e) => void save(e)} className="space-y-6 pb-10">
       <header className="rounded-2xl border bg-gradient-to-r from-brand-800 to-brand-600 text-white p-6 shadow-lg flex flex-wrap justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gold">Automation</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-brand-600">Automation</p>
           <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">Workflow builder</h1>
           <p className="mt-1 text-white/80 text-sm">Triggers · conditions · email/SMS/Slack/WhatsApp · Drive · CRM · exports</p>
         </div>
@@ -155,7 +155,7 @@ export default function WorkflowBuilderPage() {
           <button type="button" disabled={pending} onClick={() => void runNow()} className="rounded-full bg-white/15 px-4 py-2 text-sm font-semibold">
             Run now
           </button>
-          <button type="submit" disabled={pending} className="rounded-full bg-gold px-4 py-2 text-sm font-bold text-white">
+          <button type="submit" disabled={pending} className="rounded-full bg-brand-600 px-4 py-2 text-sm font-bold text-white">
             {pending ? 'Saving…' : 'Save workflow'}
           </button>
         </div>

@@ -223,7 +223,7 @@ export default function HomePage() {
             <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {courses.map((c) => (
                 <Link key={c.id} to={`/courses/${c.id}`} className="group rounded-2xl border border-stone-200 bg-white p-5 hover:shadow-lg hover:border-brand-300 transition">
-                  {c.featured && <p className="text-xs font-semibold uppercase text-[#BF0A30]">Featured</p>}
+                  {c.featured && <p className="text-xs font-semibold uppercase text-[#00a651]">Featured</p>}
                   <p className="text-xs font-bold uppercase text-brand-700">{c.level}</p>
                   <h3 className="mt-2 font-display font-bold text-lg group-hover:text-brand-700">{c.title}</h3>
                   <p className="mt-2 text-sm text-stone-600 line-clamp-2">{c.description}</p>
@@ -322,7 +322,7 @@ export default function HomePage() {
             <ul className="space-y-3 text-sm text-stone-700">
               {['Shared workbooks for shops and NGOs', 'Learning paths for clerks and officers', 'Creator studio if your team sells templates'].map((item) => (
                 <li key={item} className="flex gap-3 items-start">
-                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[#BF0A30] text-xs font-bold">✓</span>
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[#00a651] text-xs font-bold">✓</span>
                   {item}
                 </li>
               ))}
@@ -385,7 +385,7 @@ export default function HomePage() {
           <div className="mt-10 grid md:grid-cols-2 gap-5">
             {BLOG_POSTS.map((p) => (
               <Link key={p.slug} to={`/blog/${p.slug}`} className="group rounded-2xl border border-stone-200 bg-white p-6 hover:border-brand-400 hover:shadow-lg transition">
-                <p className="text-xs font-bold uppercase text-[#BF0A30]">{p.category}</p>
+                <p className="text-xs font-bold uppercase text-[#00a651]">{p.category}</p>
                 <h3 className="mt-2 font-display font-bold text-xl group-hover:text-brand-700">{p.title}</h3>
                 <p className="mt-2 text-sm text-stone-600">{p.excerpt}</p>
               </Link>

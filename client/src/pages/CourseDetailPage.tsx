@@ -81,10 +81,10 @@ export default function CourseDetailPage() {
 
       <section className="relative overflow-hidden border-b">
         <div className="absolute inset-0 bg-brand-900" />
-        <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_20%_30%,#BF0A30,transparent_40%),radial-gradient(circle_at_80%_0%,#1a3f8f,transparent_45%)]" />
+        <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_20%_30%,#00a651,transparent_40%),radial-gradient(circle_at_80%_0%,#00753a,transparent_45%)]" />
         <div className="relative mx-auto max-w-6xl px-4 py-10 md:py-14 grid md:grid-cols-[1.4fr_1fr] gap-8 items-center">
           <div className="text-white">
-            <p className="text-xs font-bold uppercase tracking-widest text-gold">{course.level} course</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-600">{course.level} course</p>
             <h1 className="mt-3 text-3xl sm:text-4xl font-extrabold leading-tight">{course.title}</h1>
             <p className="mt-4 text-white/80 text-lg max-w-xl">{course.description}</p>
             <p className="mt-4 text-sm text-white/70">
@@ -93,17 +93,17 @@ export default function CourseDetailPage() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               {user && !enrollment && (
-                <button type="button" onClick={() => void enroll()} className="rounded-full bg-gold px-6 py-3 font-bold text-white shadow-lg">
+                <button type="button" onClick={() => void enroll()} className="rounded-full bg-brand-600 px-6 py-3 font-bold text-white shadow-lg">
                   Start learning — {price === 0 ? 'Free' : formatUsd(price)}
                 </button>
               )}
               {enrollment && (
-                <Link to={`/courses/${course.id}/learn`} className="rounded-full bg-gold px-6 py-3 font-bold text-white shadow-lg">
+                <Link to={`/courses/${course.id}/learn`} className="rounded-full bg-brand-600 px-6 py-3 font-bold text-white shadow-lg">
                   Resume ({enrollment.progress}%)
                 </Link>
               )}
               {!user && (
-                <Link to="/login" className="rounded-full bg-gold px-6 py-3 font-bold text-white shadow-lg">
+                <Link to="/login" className="rounded-full bg-brand-600 px-6 py-3 font-bold text-white shadow-lg">
                   Log in to start
                 </Link>
               )}
@@ -158,7 +158,7 @@ export default function CourseDetailPage() {
               <ul className="mt-5 space-y-3">
                 {(course.objectives?.length ? course.objectives : ['Complete the lessons and practice tasks in this course']).map((o) => (
                   <li key={o} className="flex gap-3 text-stone-700">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold text-white text-xs font-bold">✓</span>
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white text-xs font-bold">✓</span>
                     <span>{o}</span>
                   </li>
                 ))}
@@ -200,7 +200,7 @@ export default function CourseDetailPage() {
                       onClick={() => setOpenModule(openModule === mi ? null : mi)}
                     >
                       <div>
-                        <p className="text-xs font-bold uppercase tracking-wide text-gold">Module {mi + 1}</p>
+                        <p className="text-xs font-bold uppercase tracking-wide text-brand-600">Module {mi + 1}</p>
                         <p className="font-bold text-brand-800">{mod.title}</p>
                         <p className="text-xs text-stone-500 mt-0.5">{mod.lessons.length} topics</p>
                       </div>

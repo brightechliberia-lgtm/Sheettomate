@@ -44,7 +44,7 @@ export default function NewsletterForm({
           onDark ? 'border-white/30 bg-white text-stone-900 placeholder:text-stone-500' : 'border-stone-300 bg-white'
         }`}
       />
-      <button type="submit" className="rounded-full bg-gold px-5 py-2.5 text-sm font-bold text-white">
+      <button type="submit" className="rounded-full bg-brand-600 px-5 py-2.5 text-sm font-bold text-white">
         Join free
       </button>
       {status && <p className={`sm:col-span-2 text-xs w-full ${onDark ? 'text-white/70' : 'text-stone-500'}`}>{status}</p>}

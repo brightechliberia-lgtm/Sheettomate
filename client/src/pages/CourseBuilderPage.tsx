@@ -159,7 +159,7 @@ export default function CourseBuilderPage() {
   return (
     <div className="space-y-6 pb-10">
       <header className="rounded-2xl border bg-gradient-to-r from-brand-800 to-brand-600 text-white p-6 shadow-lg">
-        <p className="text-xs font-bold uppercase tracking-widest text-gold">Course builder</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-brand-600">Course builder</p>
         <h1 className="mt-1 text-2xl sm:text-3xl font-extrabold">{title || 'Untitled course'}</h1>
         <p className="mt-2 text-white/80 text-sm">Structure modules with Learning Outcomes → core topics → Lesson Summary.</p>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -180,7 +180,7 @@ export default function CourseBuilderPage() {
               {label}
             </button>
           ))}
-          <Link to={`/courses/${id}`} className="rounded-full px-4 py-1.5 text-sm font-semibold bg-gold text-white">
+          <Link to={`/courses/${id}`} className="rounded-full px-4 py-1.5 text-sm font-semibold bg-brand-600 text-white">
             Preview page
           </Link>
         </div>
@@ -199,7 +199,7 @@ export default function CourseBuilderPage() {
               <div key={mod.title} className="border-b last:border-0">
                 <div className="px-5 py-3 bg-stone-50 flex justify-between gap-2">
                   <div>
-                    <p className="text-[10px] font-bold uppercase text-gold">Module {mi + 1}</p>
+                    <p className="text-[10px] font-bold uppercase text-brand-600">Module {mi + 1}</p>
                     <p className="font-bold text-brand-800">{mod.title}</p>
                   </div>
                   <p className="text-xs text-stone-500 self-center">{mod.lessons.length} topics</p>

@@ -41,7 +41,7 @@ export default function PillarNav({ active }: { active: PillarId }) {
                 : 'border-stone-200/80 bg-white/95 backdrop-blur text-brand-900 hover:border-accent-300 hover:shadow-md'
             }`}
           >
-            {!on && <div className="absolute inset-0 bg-gradient-to-br from-brand-50/0 to-[#BF0A30]/0 group-hover:from-brand-50/80 group-hover:to-red-50/30 transition-colors" />}
+            {!on && <div className="absolute inset-0 bg-gradient-to-br from-brand-50/0 to-brand-50/0 group-hover:from-brand-50/80 group-hover:to-brand-100/40 transition-colors" />}
             <span className="relative text-xl" aria-hidden>
               {p.icon}
             </span>
