@@ -50,6 +50,10 @@ export const env = {
   smtpSecure: process.env.SMTP_SECURE === 'true',
   /** Set SMTP_TLS_INSECURE=true only for shared hosts with mismatched cert CN (e.g. some cPanel setups). */
   smtpTlsInsecure: process.env.SMTP_TLS_INSECURE === 'true',
+  /** Prefer Resend HTTPS API (works on Railway; SMTP ports often time out). */
+  resendApiKey:
+    process.env.RESEND_API_KEY ||
+    (process.env.SMTP_HOST === 'smtp.resend.com' ? process.env.SMTP_PASS ?? '' : ''),
   redisUrl: process.env.REDIS_URL ?? '',
   cdnBaseUrl: (process.env.CDN_BASE_URL ?? '').replace(/\/$/, ''),
   openaiApiKey: process.env.OPENAI_API_KEY ?? '',

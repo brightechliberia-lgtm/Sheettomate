@@ -37,11 +37,37 @@ function createTransport() {
 const transport = createTransport();
 
 export function emailsDeliveredViaSmtp(): boolean {
-  return Boolean(env.smtpHost);
+  return Boolean(env.resendApiKey || env.smtpHost);
+}
+
+async function sendViaResend(to: string, subject: string, html: string): Promise<void> {
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${env.resendApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: env.smtpFrom,
+      to: [to],
+      subject,
+      html,
+    }),
+  });
+  const body = (await res.json().catch(() => ({}))) as { id?: string; message?: string; name?: string };
+  if (!res.ok) {
+    throw new Error(body.message || body.name || `Resend HTTP ${res.status}`);
+  }
+  logger.info('Email sent via Resend API', { to, subject, messageId: body.id });
 }
 
 async function sendMail(to: string, subject: string, html: string): Promise<void> {
   try {
+    if (env.resendApiKey) {
+      await sendViaResend(to, subject, html);
+      return;
+    }
+
     const info = await transport.sendMail({ from, to, subject, html });
     if (!env.smtpHost) {
       await fs.mkdir(outboxDir, { recursive: true });
@@ -62,8 +88,8 @@ async function sendMail(to: string, subject: string, html: string): Promise<void
     logger.error('SMTP send failed', {
       to,
       subject,
-      host: env.smtpHost,
-      port: env.smtpPort,
+      host: env.resendApiKey ? 'api.resend.com' : env.smtpHost,
+      port: env.resendApiKey ? 443 : env.smtpPort,
       error: error instanceof Error ? error.message : String(error),
     });
     throw error;
