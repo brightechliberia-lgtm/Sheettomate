@@ -18,7 +18,9 @@ const root = path.resolve(__dirname, '..');
 
 async function loadEnvFile(filePath) {
   try {
-    const raw = await fs.readFile(filePath, 'utf8');
+    let raw = await fs.readFile(filePath, 'utf8');
+    if (raw.charCodeAt(0) === 0xfeff) raw = raw.slice(1);
+    let count = 0;
     for (const line of raw.split(/\r?\n/)) {
       const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith('#')) continue;
@@ -32,8 +34,11 @@ async function loadEnvFile(filePath) {
       ) {
         val = val.slice(1, -1);
       }
-      if (process.env[key] === undefined) process.env[key] = val;
+      // File values win (including over empty env vars left in the shell).
+      process.env[key] = val;
+      count += 1;
     }
+    if (count) console.log(`Loaded ${count} vars from ${path.basename(filePath)}`);
   } catch {
     /* optional */
   }
