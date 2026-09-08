@@ -16,8 +16,10 @@ import {
 const STATE_COOKIE = 'sm_google_oauth';
 const ORIGIN_COOKIE = 'sm_oauth_origin';
 
-function googleRedirectUri(origin: string): string {
-  return `${origin}/api/auth/google/callback`;
+function googleRedirectUri(): string {
+  // Must be the API host in production (api.sheettomate.com), not the static frontend.
+  const base = (env.publicApiUrl || env.clientOrigin).replace(/\/$/, '');
+  return `${base}/api/auth/google/callback`;
 }
 
 export function googleAuthStatus(_req: Request, res: Response) {
@@ -42,7 +44,7 @@ export function startGoogleAuth(req: Request, res: Response) {
   res.cookie(ORIGIN_COOKIE, origin, cookieOpts);
   const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
   url.searchParams.set('client_id', env.googleClientId);
-  url.searchParams.set('redirect_uri', googleRedirectUri(origin));
+  url.searchParams.set('redirect_uri', googleRedirectUri());
   url.searchParams.set('response_type', 'code');
   url.searchParams.set('scope', 'openid email profile');
   url.searchParams.set('state', state);
@@ -78,7 +80,7 @@ export async function googleAuthCallback(req: Request, res: Response, next: Next
         code,
         client_id: env.googleClientId,
         client_secret: env.googleClientSecret,
-        redirect_uri: googleRedirectUri(frontend),
+        redirect_uri: googleRedirectUri(),
         grant_type: 'authorization_code',
       }),
     });
