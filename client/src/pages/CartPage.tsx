@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 import type { MarketplaceTemplate } from '@sheetomate/shared';
 
 interface CartRow {
@@ -14,6 +15,7 @@ interface CartRow {
 export default function CartPage() {
   const { user } = useAuth();
   const { ids, remove } = useCart();
+  const { formatUsd } = useCurrency();
   const [items, setItems] = useState<CartRow[]>([]);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export default function CartPage() {
               {row.template.title}
             </Link>
             <div className="flex gap-4">
-              <span>${Number(row.template.price).toFixed(2)}</span>
+              <span>{formatUsd(Number(row.template.price))}</span>
               <button type="button" onClick={() => remove(row.templateId)} className="text-red-600 text-sm">
                 Remove
               </button>
@@ -47,7 +49,7 @@ export default function CartPage() {
           </li>
         ))}
       </ul>
-      <p className="mt-6 font-bold">Total ${total.toFixed(2)}</p>
+      <p className="mt-6 font-bold">Total {formatUsd(total)}</p>
       {user && items.length > 0 && (
         <Link to="/checkout" className="mt-4 inline-block rounded-lg bg-brand-600 px-4 py-2 text-white font-semibold">
           Checkout

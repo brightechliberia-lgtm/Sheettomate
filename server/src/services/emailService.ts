@@ -143,6 +143,8 @@ export async function sendPurchaseConfirmationEmail(
   amount: string,
   currency: string,
 ): Promise<void> {
+  const dashboardUrl = `${env.clientOrigin.replace(/\/$/, '')}/dashboard`;
+  const profileUrl = `${env.clientOrigin.replace(/\/$/, '')}/profile`;
   await sendMail(
     to,
     `Purchase confirmation: ${templateTitle}`,
@@ -150,7 +152,15 @@ export async function sendPurchaseConfirmationEmail(
       'Thanks for your purchase',
       `<p>Hi ${name},</p>
        <p>We received your order for <strong>${templateTitle}</strong> (${amount} ${currency}).</p>
-       <p>Open your dashboard to download the file after payment is confirmed (Orange Money, Mobile Money, or BanffPay Visa).</p>`,
+       <p>Your file is ready. Open your dashboard to download it anytime.</p>
+       <p>
+         <a href="${dashboardUrl}" style="display:inline-block;background:#00a651;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:700;">
+           Open dashboard
+         </a>
+       </p>
+       <p style="font-size:13px;color:#57534e;">
+         Or go to <a href="${profileUrl}" style="color:#00a651;">your profile</a> → Purchased templates.
+       </p>`,
     ),
   );
 }

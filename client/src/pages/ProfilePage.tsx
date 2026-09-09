@@ -1,7 +1,9 @@
 import { FormEvent, useEffect, useState, type ChangeEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { WEST_AFRICAN_COUNTRIES } from '@sheetomate/shared';
 import { api } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { downloadTemplateFile } from '../lib/download';
 import type { AuthUser } from '@sheetomate/shared';
 
 interface DownloadRow {
@@ -186,9 +188,26 @@ export default function ProfilePage() {
         <h2 className="font-bold text-xl">Purchased templates</h2>
         <ul className="mt-3 space-y-2">
           {templates.map((row) => (
-            <li key={row.id} className="rounded-lg border bg-white px-4 py-3">
-              {row.template.title}{' '}
-              <span className="text-sm text-stone-500">({row.template.category})</span>
+            <li key={row.id} className="rounded-lg border bg-white px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <Link to={`/templates/${row.template.id}`} className="font-medium hover:text-brand-700">
+                  {row.template.title}
+                </Link>{' '}
+                <span className="text-sm text-stone-500">({row.template.category})</span>
+              </div>
+              <button
+                type="button"
+                className="rounded-lg border px-3 py-1.5 text-sm font-semibold"
+                onClick={() => {
+                  setError('');
+                  setMessage('');
+                  void downloadTemplateFile(row.template.id)
+                    .then(() => setMessage('Download started.'))
+                    .catch((err) => setError(err instanceof Error ? err.message : 'Download failed'));
+                }}
+              >
+                Download
+              </button>
             </li>
           ))}
           {templates.length === 0 && <li className="text-stone-500 text-sm">No purchases yet.</li>}

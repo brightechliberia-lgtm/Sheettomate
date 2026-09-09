@@ -24,6 +24,18 @@ function reference(): string {
 
 async function chargeProvider(method: ChargeMethod, req: Parameters<typeof banffpayCharge>[0]): Promise<ChargeResult> {
   if (method === 'ORANGE_MONEY') {
+    const preferOrange = !env.orangeViaBanffpay && (env.paymentsMode === 'sandbox' || Boolean(env.orangeMoneyApiKey));
+    if (preferOrange) {
+      try {
+        return await orangeCharge(req);
+      } catch (error) {
+        if (env.banffpayApiKey || env.paymentsMode === 'sandbox') {
+          logger.warn('Orange Money unavailable, falling back to BanffPay', { error });
+          return banffpayCharge(req);
+        }
+        throw error;
+      }
+    }
     try {
       return await banffpayCharge(req);
     } catch (error) {
@@ -48,7 +60,7 @@ export async function initiateCheckout(input: {
 }) {
   if (input.idempotencyKey) {
     const existing = await prisma.payment.findUnique({ where: { idempotencyKey: input.idempotencyKey } });
-    if (existing) {
+    if (existing && (existing.status === 'PENDING' || existing.status === 'COMPLETED')) {
       return { payment: existing, reuse: true };
     }
   }
@@ -347,8 +359,8 @@ export async function fulfillPayment(paymentId: string) {
       payment.user.email,
       payment.user.name,
       item.title,
-      String(item.amountUsd),
-      'USD',
+      String(payment.currency === 'LRD' ? payment.amountLrd : payment.amountUsd),
+      payment.currency,
     ).catch((error) => logger.warn('Purchase email failed', { error }));
   }
   await prisma.cartItem.deleteMany({

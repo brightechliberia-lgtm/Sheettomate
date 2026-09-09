@@ -10,14 +10,18 @@ const METHODS: { id: PaymentGateway; label: string; hint: string }[] = [
 export default function PaymentMethodSelector({
   value,
   onChange,
+  enabled,
 }: {
   value: PaymentGateway;
   onChange: (value: PaymentGateway) => void;
+  enabled?: Partial<Record<PaymentGateway, boolean>>;
 }) {
+  const visible = METHODS.filter((method) => enabled?.[method.id] !== false);
+
   return (
     <fieldset className="space-y-2">
       <legend className="font-semibold">Pay with</legend>
-      {METHODS.map((method) => (
+      {visible.map((method) => (
         <label key={method.id} className="flex gap-3 rounded-xl border p-3 cursor-pointer has-[:checked]:border-brand-600">
           <input type="radio" name="gateway" checked={value === method.id} onChange={() => onChange(method.id)} />
           <span>
@@ -26,6 +30,7 @@ export default function PaymentMethodSelector({
           </span>
         </label>
       ))}
+      {!visible.length && <p className="text-sm text-red-600">No payment methods are available right now.</p>}
     </fieldset>
   );
 }

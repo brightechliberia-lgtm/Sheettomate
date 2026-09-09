@@ -11,8 +11,10 @@ import { publicAssetUrl, resolveLocalFile, storeTemplateFile } from '../services
 import { generateSheetPreview } from '../services/previewService';
 import { invalidateTemplateCache } from '../services/cacheService';
 import { logger } from '../config/logger';
+import { env } from '../config/env';
 import { hashToken } from '../services/tokenService';
 import { notifyMatchingTemplate } from '../services/notificationService';
+import { createGoogleSheetFromUpload, googleSheetsConfigured } from '../services/googleSheetsService';
 import {
   assertCanManageTemplate,
   listPublishedTemplates,
@@ -147,6 +149,24 @@ export async function createTemplate(req: Request, res: Response, next: NextFunc
       throw new ValidationError('Choose an .xlsx or .csv file to upload.');
     }
 
+    let demoUrl = body.demoUrl || null;
+    const uploadFile = filesOf(req).file;
+    if (body.createGoogleSheet) {
+      if (!uploadFile) {
+        throw new ValidationError('Upload a spreadsheet file to auto-create Google Sheets.');
+      }
+      if (!googleSheetsConfigured()) {
+        throw new ValidationError(
+          'Google Sheets auto-create is not configured on the server. Ask an admin to set GOOGLE_SHEETS_REFRESH_TOKEN or a service account.',
+        );
+      }
+      const sheet = await createGoogleSheetFromUpload(uploadFile, body.title);
+      if (!sheet?.url) {
+        throw new ValidationError('Could not create the Google Sheet. Try again or upload without that option.');
+      }
+      demoUrl = sheet.url;
+    }
+
     const template = await prisma.template.create({
       data: {
         title: body.title,
@@ -158,7 +178,7 @@ export async function createTemplate(req: Request, res: Response, next: NextFunc
         fileKey: uploads.fileKey,
         previewUrl: body.previewUrl || uploads.previewUrl,
         previewKey: uploads.previewKey,
-        demoUrl: body.demoUrl || null,
+        demoUrl,
         videoTutorial: body.videoTutorial || null,
         rows: body.rows ?? uploads.rows,
         columns: body.columns ?? uploads.columns,
@@ -166,6 +186,7 @@ export async function createTemplate(req: Request, res: Response, next: NextFunc
         version: body.version ?? '1.0',
         language: body.language ?? 'en',
         isAiGenerated: body.isAiGenerated ?? false,
+        published: body.published ?? true,
         createdById: req.user!.sub,
       },
     });
@@ -188,16 +209,35 @@ export async function updateTemplate(req: Request, res: Response, next: NextFunc
     const body = updateTemplateSchema.parse(req.body);
     const uploads = await persistUploads(req, existing);
 
+    let demoUrl = body.demoUrl === '' ? null : body.demoUrl ?? existing.demoUrl;
+    const uploadFile = filesOf(req).file;
+    if (body.createGoogleSheet) {
+      if (!uploadFile) {
+        throw new ValidationError('Upload a new spreadsheet file to regenerate the Google Sheet.');
+      }
+      if (!googleSheetsConfigured()) {
+        throw new ValidationError(
+          'Google Sheets auto-create is not configured on the server. Ask an admin to set GOOGLE_SHEETS_REFRESH_TOKEN or a service account.',
+        );
+      }
+      const sheet = await createGoogleSheetFromUpload(uploadFile, body.title ?? existing.title);
+      if (!sheet?.url) {
+        throw new ValidationError('Could not create the Google Sheet. Try again or save without that option.');
+      }
+      demoUrl = sheet.url;
+    }
+
+    const { createGoogleSheet: _createGoogleSheet, ...rest } = body;
     const template = await prisma.template.update({
       where: { id: existing.id },
       data: {
-        ...body,
+        ...rest,
         tags: body.tags,
         fileUrl: uploads.fileUrl ?? existing.fileUrl,
         fileKey: uploads.fileKey ?? existing.fileKey,
         previewUrl: body.previewUrl || uploads.previewUrl || existing.previewUrl,
         previewKey: uploads.previewKey ?? existing.previewKey,
-        demoUrl: body.demoUrl === '' ? null : body.demoUrl ?? existing.demoUrl,
+        demoUrl,
         videoTutorial: body.videoTutorial === '' ? null : body.videoTutorial ?? existing.videoTutorial,
         rows: body.rows ?? uploads.rows ?? existing.rows,
         columns: body.columns ?? uploads.columns ?? existing.columns,
@@ -274,7 +314,7 @@ export async function initiateDownload(req: Request, res: Response, next: NextFu
     logger.info('Download token issued', { templateId: template.id, userId: req.user!.sub });
     return sendSuccess(res, {
       token: raw,
-      downloadUrl: `/api/templates/download/${raw}`,
+      downloadUrl: `${env.publicApiUrl.replace(/\/$/, '')}/api/templates/download/${raw}`,
       expiresInSeconds: 600,
     });
   } catch (error) {

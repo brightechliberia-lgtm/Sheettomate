@@ -72,6 +72,14 @@ export const env = {
   orangeMoneyMerchantId: process.env.ORANGE_MONEY_MERCHANT_ID ?? '',
   orangeMoneyApiKey: process.env.ORANGE_MONEY_API_KEY ?? '',
   orangeMoneyBaseUrl: process.env.ORANGE_MONEY_BASE_URL ?? 'https://api.orange.com/orange-money-webpay/dev/v1',
+  /** Optional separate HMAC secret for Orange notif_url webhooks (falls back to BanffPay secret). */
+  orangeMoneyWebhookSecret:
+    process.env.ORANGE_MONEY_WEBHOOK_SECRET ?? process.env.BANFFPAY_WEBHOOK_SECRET ?? 'dev-banffpay-webhook-secret',
+  /**
+   * When true (default), ORANGE_MONEY uses the Orange adapter first if configured.
+   * Set ORANGE_VIA_BANFFPAY=true to force BanffPay aggregation for Orange rails.
+   */
+  orangeViaBanffpay: process.env.ORANGE_VIA_BANFFPAY === 'true',
   sentryDsn: process.env.SENTRY_DSN ?? '',
   publicApiUrl: process.env.PUBLIC_API_URL ?? 'http://localhost:4000',
   mailchimpApiKey: process.env.MAILCHIMP_API_KEY ?? '',
@@ -95,6 +103,11 @@ export const env = {
   quickbooksRealm: process.env.QUICKBOOKS_REALM ?? '',
   googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+  /** Optional: refresh token with Sheets + Drive scopes for auto-creating Sheets on upload. */
+  googleSheetsRefreshToken: process.env.GOOGLE_SHEETS_REFRESH_TOKEN ?? '',
+  /** Optional service account for Sheets auto-create (alternative to refresh token). */
+  googleServiceAccountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ?? '',
+  googleServiceAccountPrivateKey: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ?? '',
 };
 
 export const isProduction = env.nodeEnv === 'production';

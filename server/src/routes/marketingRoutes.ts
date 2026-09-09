@@ -1,10 +1,12 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { prisma } from '../config/prisma';
+import { env } from '../config/env';
 import { sendSuccess } from '../utils/http';
 import { subscribeEmail } from '../services/marketingService';
 import { logger } from '../config/logger';
 import { getCatalogConfig } from '../services/catalogSettings';
+import { googleSheetsConfigured } from '../services/googleSheetsService';
 
 const subscribeSchema = z.object({
   email: z.string().email(),
@@ -21,6 +23,15 @@ router.get('/catalog', async (_req: Request, res: Response, next: NextFunction) 
   } catch (error) {
     next(error);
   }
+});
+
+router.get('/fx', (_req: Request, res: Response) => {
+  return sendSuccess(res, {
+    base: 'USD',
+    quote: 'LRD',
+    rate: env.fxUsdLrd,
+    googleSheetsUpload: googleSheetsConfigured(),
+  });
 });
 
 router.post('/subscribe', async (req: Request, res: Response, next: NextFunction) => {

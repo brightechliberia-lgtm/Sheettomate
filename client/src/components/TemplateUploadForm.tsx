@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { TEMPLATE_TAGS } from '@sheetomate/shared';
 import { api } from '../lib/api';
 import { useCatalog } from '../hooks/useCatalog';
+import { useCurrency } from '../context/CurrencyContext';
 
 const LEVELS = [
   { id: 'BASIC', label: 'Basic' },
@@ -9,19 +10,64 @@ const LEVELS = [
   { id: 'EXPERT', label: 'Expert' },
 ] as const;
 
+export interface EditableTemplate {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  price: string | number;
+  version: string;
+  softwareRequired: string;
+  demoUrl: string | null;
+  videoTutorial: string | null;
+  published?: boolean;
+}
+
 export default function TemplateUploadForm({
   onCreated,
+  editing = null,
+  onCancelEdit,
 }: {
   onCreated: () => void;
+  editing?: EditableTemplate | null;
+  onCancelEdit?: () => void;
 }) {
   const { catalog } = useCatalog();
+  const { googleSheetsUpload } = useCurrency();
   const [dragging, setDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
-  const [category, setCategory] = useState('Finance');
+  const [category, setCategory] = useState(editing?.category ?? 'Finance');
   const [level, setLevel] = useState<(typeof LEVELS)[number]['id']>('BASIC');
-  const [price, setPrice] = useState('4.99');
+  const [price, setPrice] = useState(String(editing?.price ?? '4.99'));
+  const [title, setTitle] = useState(editing?.title ?? '');
+  const [description, setDescription] = useState(editing?.description ?? '');
+  const [version, setVersion] = useState(editing?.version ?? '1.0');
+  const [softwareRequired, setSoftwareRequired] = useState(editing?.softwareRequired ?? 'Excel / Google Sheets');
+  const [demoUrl, setDemoUrl] = useState(editing?.demoUrl ?? '');
+  const [videoTutorial, setVideoTutorial] = useState(editing?.videoTutorial ?? '');
+  const [published, setPublished] = useState(editing?.published ?? true);
+  const [tags, setTags] = useState<string[]>(editing?.tags ?? []);
+  const [createGoogleSheet, setCreateGoogleSheet] = useState(false);
+
+  useEffect(() => {
+    if (!editing) return;
+    setTitle(editing.title);
+    setDescription(editing.description);
+    setCategory(editing.category);
+    setPrice(String(editing.price));
+    setVersion(editing.version);
+    setSoftwareRequired(editing.softwareRequired);
+    setDemoUrl(editing.demoUrl ?? '');
+    setVideoTutorial(editing.videoTutorial ?? '');
+    setPublished(editing.published ?? true);
+    setTags(editing.tags ?? []);
+    setFile(null);
+    setCreateGoogleSheet(false);
+    setError('');
+  }, [editing]);
 
   useEffect(() => {
     if (catalog.templateCategories.length && !catalog.templateCategories.includes(category)) {
@@ -30,33 +76,53 @@ export default function TemplateUploadForm({
   }, [catalog.templateCategories, category]);
 
   useEffect(() => {
+    if (editing) return;
     const row = catalog.templateLevelPrices[category];
     if (row?.[level] != null) setPrice(String(row[level]));
-  }, [catalog.templateLevelPrices, category, level]);
+  }, [catalog.templateLevelPrices, category, level, editing]);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = e.currentTarget;
-    const data = new FormData(form);
-    if (!file) {
+    if (!editing && !file) {
       setError('Choose an .xlsx or .csv file.');
       return;
     }
-    const selected = TEMPLATE_TAGS.filter((tag) => data.getAll('tags').includes(tag));
-    data.delete('tags');
-    selected.forEach((tag) => data.append('tags', tag));
+    const data = new FormData();
+    data.set('title', title);
+    data.set('description', description);
     data.set('category', category);
     data.set('price', price);
-    data.set('file', file);
+    data.set('version', version);
+    data.set('softwareRequired', softwareRequired);
+    if (demoUrl) data.set('demoUrl', demoUrl);
+    if (videoTutorial) data.set('videoTutorial', videoTutorial);
+    data.set('published', published ? 'true' : 'false');
+    tags.forEach((tag) => data.append('tags', tag));
+    if (file) data.set('file', file);
+    if (createGoogleSheet) data.set('createGoogleSheet', 'true');
+
     setError('');
     setPending(true);
     try {
-      await api('/templates', { method: 'POST', body: data });
-      form.reset();
+      if (editing) {
+        await api(`/templates/${editing.id}`, { method: 'PUT', body: data });
+      } else {
+        await api('/templates', { method: 'POST', body: data });
+      }
       setFile(null);
+      setCreateGoogleSheet(false);
+      if (!editing) {
+        setTitle('');
+        setDescription('');
+        setDemoUrl('');
+        setVideoTutorial('');
+        setTags([]);
+        setPublished(true);
+      }
       onCreated();
+      onCancelEdit?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      setError(err instanceof Error ? err.message : editing ? 'Update failed' : 'Upload failed');
     } finally {
       setPending(false);
     }
@@ -64,40 +130,67 @@ export default function TemplateUploadForm({
 
   return (
     <form onSubmit={onSubmit} className="rounded-2xl border bg-white p-6 space-y-4">
-      <h2 className="text-xl font-bold">Upload template</h2>
-      <input name="title" required minLength={3} placeholder="Title" className="w-full rounded-lg border px-3 py-2" />
-      <textarea name="description" required minLength={10} rows={4} placeholder="Description" className="w-full rounded-lg border px-3 py-2" />
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-xl font-bold">{editing ? 'Edit template' : 'Upload template'}</h2>
+        {editing && onCancelEdit && (
+          <button type="button" onClick={onCancelEdit} className="text-sm text-stone-600">
+            Cancel
+          </button>
+        )}
+      </div>
+      <input
+        required
+        minLength={3}
+        placeholder="Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="w-full rounded-lg border px-3 py-2"
+      />
+      <textarea
+        required
+        minLength={10}
+        rows={4}
+        placeholder="Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        className="w-full rounded-lg border px-3 py-2"
+      />
       <div className="grid sm:grid-cols-2 gap-3">
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full rounded-lg border px-3 py-2"
-        >
+        <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-lg border px-3 py-2">
           {catalog.templateCategories.map((c) => (
             <option key={c}>{c}</option>
           ))}
         </select>
-        <select
-          value={level}
-          onChange={(e) => setLevel(e.target.value as (typeof LEVELS)[number]['id'])}
-          className="w-full rounded-lg border px-3 py-2"
-        >
-          {LEVELS.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.label}
-            </option>
-          ))}
-        </select>
+        {!editing && (
+          <select
+            value={level}
+            onChange={(e) => setLevel(e.target.value as (typeof LEVELS)[number]['id'])}
+            className="w-full rounded-lg border px-3 py-2"
+          >
+            {LEVELS.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.label}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
       <div className="flex flex-wrap gap-2 text-sm">
         {TEMPLATE_TAGS.map((tag) => (
           <label key={tag} className="flex items-center gap-1">
-            <input type="checkbox" name="tags" value={tag} /> {tag}
+            <input
+              type="checkbox"
+              checked={tags.includes(tag)}
+              onChange={(e) =>
+                setTags((current) => (e.target.checked ? [...current, tag] : current.filter((t) => t !== tag)))
+              }
+            />{' '}
+            {tag}
           </label>
         ))}
       </div>
       <div>
-        <label className="text-sm text-stone-600">Price (USD) — suggested from admin matrix</label>
+        <label className="text-sm text-stone-600">Price (USD){editing ? '' : ' — suggested from admin matrix'}</label>
         <input
           type="number"
           step="0.01"
@@ -108,11 +201,53 @@ export default function TemplateUploadForm({
         />
       </div>
       <div className="grid sm:grid-cols-2 gap-3">
-        <input name="version" placeholder="Version" defaultValue="1.0" className="rounded-lg border px-3 py-2" />
-        <input name="softwareRequired" placeholder="Software" defaultValue="Excel / Google Sheets" className="rounded-lg border px-3 py-2" />
-        <input name="demoUrl" placeholder="Demo URL" className="rounded-lg border px-3 py-2" />
-        <input name="videoTutorial" placeholder="Video tutorial URL" className="rounded-lg border px-3 py-2" />
+        <input
+          placeholder="Version"
+          value={version}
+          onChange={(e) => setVersion(e.target.value)}
+          className="rounded-lg border px-3 py-2"
+        />
+        <input
+          placeholder="Software"
+          value={softwareRequired}
+          onChange={(e) => setSoftwareRequired(e.target.value)}
+          className="rounded-lg border px-3 py-2"
+        />
+        <input
+          placeholder="Demo URL"
+          value={demoUrl}
+          onChange={(e) => setDemoUrl(e.target.value)}
+          className="rounded-lg border px-3 py-2"
+        />
+        <input
+          placeholder="Video tutorial URL"
+          value={videoTutorial}
+          onChange={(e) => setVideoTutorial(e.target.value)}
+          className="rounded-lg border px-3 py-2"
+        />
       </div>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
+        Listed in marketplace
+      </label>
+      <label className="flex items-start gap-2 text-sm">
+        <input
+          type="checkbox"
+          className="mt-1"
+          checked={createGoogleSheet}
+          onChange={(e) => setCreateGoogleSheet(e.target.checked)}
+          disabled={Boolean(editing) && !file}
+        />
+        <span>
+          Auto-create a Google Sheets version from this file
+          {!googleSheetsUpload && (
+            <span className="block text-stone-500">
+              Requires Google Sheets credentials on the API server. When set, the sheet link is saved as the demo URL.
+            </span>
+          )}
+          {editing && !file && <span className="block text-stone-500">Upload a new file to regenerate the Sheet.</span>}
+        </span>
+      </label>
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -127,7 +262,7 @@ export default function TemplateUploadForm({
         }}
         className={`rounded-xl border-2 border-dashed p-8 text-center ${dragging ? 'border-brand-600 bg-brand-50' : 'border-stone-300'}`}
       >
-        <p className="font-medium">Drag & drop an .xlsx file</p>
+        <p className="font-medium">{editing ? 'Replace file (optional)' : 'Drag & drop an .xlsx file'}</p>
         <p className="text-sm text-stone-500 mt-1">Max 50MB. First sheet becomes a preview image.</p>
         <input
           type="file"
@@ -139,7 +274,7 @@ export default function TemplateUploadForm({
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button type="submit" disabled={pending} className="rounded-lg bg-brand-600 px-4 py-2 text-white font-semibold">
-        {pending ? 'Publishing...' : 'Publish template'}
+        {pending ? (editing ? 'Saving…' : 'Publishing…') : editing ? 'Save changes' : 'Publish template'}
       </button>
     </form>
   );

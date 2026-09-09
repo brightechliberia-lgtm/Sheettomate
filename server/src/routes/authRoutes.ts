@@ -10,7 +10,7 @@ import {
   resetPassword,
   verifyEmail,
 } from '../controllers/authController';
-import { googleAuthCallback, googleAuthStatus, startGoogleAuth } from '../services/googleAuth';
+import { googleAuthCallback, googleAuthStatus, googleIdTokenLogin, startGoogleAuth } from '../services/googleAuth';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import {
@@ -27,6 +27,7 @@ const router = Router();
 router.get('/google/status', googleAuthStatus);
 router.get('/google', startGoogleAuth);
 router.get('/google/callback', googleAuthCallback);
+router.post('/google/id-token', googleIdTokenLogin);
 router.post('/register', validate(registerSchema), register);
 router.post('/login', validate(loginSchema), login);
 router.post('/refresh', refresh);

@@ -9,6 +9,8 @@ type HealthData = {
   paymentsMode?: string;
   banffpayConfigured?: boolean;
   orangeConfigured?: boolean;
+  paymentsLiveReady?: boolean;
+  webhookUrl?: string;
   redis?: boolean;
   failedPayments24h?: number;
   errors?: { id?: string; message?: string; createdAt?: string; source?: string }[];
@@ -72,8 +74,21 @@ export default function AdminHealthPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <StatusPill ok={Boolean(data.banffpayConfigured)} label={data.banffpayConfigured ? 'BanffPay configured' : 'BanffPay missing'} />
             <StatusPill ok={Boolean(data.orangeConfigured)} label={data.orangeConfigured ? 'Orange Money configured' : 'Orange Money missing'} />
+            <StatusPill
+              ok={Boolean(data.paymentsLiveReady) || data.paymentsMode === 'sandbox'}
+              label={
+                data.paymentsMode === 'sandbox'
+                  ? 'Sandbox payments OK'
+                  : data.paymentsLiveReady
+                    ? 'Live payments ready'
+                    : 'Live mode needs API keys'
+              }
+            />
             <StatusPill ok={Boolean(data.redis)} label={data.redis ? 'Redis connected' : 'Redis optional / off'} />
           </div>
+          {data.webhookUrl && (
+            <p className="mt-3 text-xs text-stone-500 break-all">Webhook URL for providers: {data.webhookUrl}</p>
+          )}
 
           {data.load && (
             <p className="mt-3 text-sm text-stone-600">

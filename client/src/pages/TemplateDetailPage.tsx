@@ -8,6 +8,8 @@ import { api } from '../lib/api';
 import { cacheTemplate } from '../lib/offline';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
+import { downloadTemplateFile } from '../lib/download';
 
 interface TemplateDetail extends MarketplaceTemplate {
   fileUrl?: string;
@@ -23,6 +25,7 @@ export default function TemplateDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   const { add } = useCart();
+  const { formatUsd } = useCurrency();
   const [template, setTemplate] = useState<TemplateDetail | null>(null);
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
@@ -47,12 +50,9 @@ export default function TemplateDetailPage() {
   async function download() {
     if (!template) return;
     try {
-      const data = await api<{ downloadUrl: string; token: string }>(`/templates/${template.id}/download`, {
-        method: 'POST',
-      });
-      window.location.href = data.downloadUrl.startsWith('http')
-        ? data.downloadUrl
-        : data.downloadUrl;
+      setMessage('Starting download…');
+      await downloadTemplateFile(template.id);
+      setMessage('Download started. If nothing appears, check your browser’s downloads bar.');
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Download failed');
     }
@@ -70,6 +70,8 @@ export default function TemplateDetailPage() {
   if (!template) {
     return <p>{message || 'Loading...'}</p>;
   }
+
+  const isGoogleSheet = Boolean(template.demoUrl?.includes('docs.google.com/spreadsheets'));
 
   return (
     <article className="space-y-6">
@@ -103,7 +105,14 @@ export default function TemplateDetailPage() {
             Rating: {template.averageRating.toFixed(1)} ({template.ratingCount})
           </div>
         </dl>
-        <p className="mt-6 text-xl font-bold">${Number(template.price).toFixed(2)}</p>
+        {template.demoUrl && (
+          <p className="mt-4 text-sm">
+            <a href={template.demoUrl} target="_blank" rel="noreferrer" className="font-semibold text-brand-700">
+              {isGoogleSheet ? 'Open Google Sheets version' : 'Open demo'}
+            </a>
+          </p>
+        )}
+        <p className="mt-6 text-xl font-bold">{formatUsd(Number(template.price))}</p>
         <div className="mt-6 flex flex-wrap gap-3">
           {user && (
             <>

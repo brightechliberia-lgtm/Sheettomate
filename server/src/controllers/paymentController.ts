@@ -6,9 +6,14 @@ import { ForbiddenError, NotFoundError } from '../utils/errors';
 import { initiateCheckout, verifyAndSettle } from '../services/paymentService';
 import { handleWebhook, verifyWebhookSignature } from '../payments/webhook';
 import { sandboxMark } from '../payments/sandbox';
+import { getPaymentsPublicConfig } from '../payments/config';
 import { env } from '../config/env';
 import { initiatePaymentSchema, walletTopupSchema } from '../validators/schemas';
 import { logger } from '../config/logger';
+
+export async function paymentsConfig(_req: Request, res: Response) {
+  return sendSuccess(res, { payments: getPaymentsPublicConfig() });
+}
 
 export async function initiate(req: Request, res: Response, next: NextFunction) {
   try {

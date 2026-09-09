@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/prisma';
 import { appOriginFromRequest, env, isAllowedClientOrigin } from '../config/env';
 import { sendSuccess } from '../utils/http';
-import { AppError } from '../utils/errors';
+import { AppError, ValidationError } from '../utils/errors';
 import {
   persistRefreshToken,
   REFRESH_COOKIE,
@@ -17,13 +17,56 @@ const STATE_COOKIE = 'sm_google_oauth';
 const ORIGIN_COOKIE = 'sm_oauth_origin';
 
 function googleRedirectUri(): string {
-  // Must be the API host in production (api.sheettomate.com), not the static frontend.
   const base = (env.publicApiUrl || env.clientOrigin).replace(/\/$/, '');
   return `${base}/api/auth/google/callback`;
 }
 
+async function upsertGoogleUser(profile: {
+  id: string;
+  email: string;
+  name?: string;
+  picture?: string;
+}) {
+  let user = await prisma.user.findFirst({
+    where: { OR: [{ googleId: profile.id }, { email: profile.email.toLowerCase() }] },
+  });
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        email: profile.email.toLowerCase(),
+        name: profile.name || profile.email.split('@')[0],
+        passwordHash: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12),
+        googleId: profile.id,
+        avatarUrl: profile.picture ?? null,
+        emailVerifiedAt: new Date(),
+        role: 'USER',
+      },
+    });
+  } else {
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        googleId: user.googleId ?? profile.id,
+        emailVerifiedAt: user.emailVerifiedAt ?? new Date(),
+        avatarUrl: user.avatarUrl ?? profile.picture ?? null,
+      },
+    });
+  }
+  return user;
+}
+
+async function issueTokens(user: { id: string; email: string; role: import('@prisma/client').Role; name: string }) {
+  const accessToken = signAccessToken(user);
+  const refreshToken = signRefreshToken(user.id);
+  await persistRefreshToken(user.id, refreshToken);
+  return { accessToken, refreshToken };
+}
+
 export function googleAuthStatus(_req: Request, res: Response) {
-  return sendSuccess(res, { enabled: Boolean(env.googleClientId && env.googleClientSecret) });
+  return sendSuccess(res, {
+    enabled: Boolean(env.googleClientId && env.googleClientSecret),
+    clientId: env.googleClientId || null,
+  });
 }
 
 export function startGoogleAuth(req: Request, res: Response) {
@@ -48,6 +91,7 @@ export function startGoogleAuth(req: Request, res: Response) {
   url.searchParams.set('response_type', 'code');
   url.searchParams.set('scope', 'openid email profile');
   url.searchParams.set('state', state);
+  // Show browser-signed-in Google accounts for quick pick
   url.searchParams.set('prompt', 'select_account');
   res.redirect(url.toString());
 }
@@ -101,39 +145,69 @@ export async function googleAuthCallback(req: Request, res: Response, next: Next
       throw new AppError(401, 'Google did not return an email');
     }
 
-    let user = await prisma.user.findFirst({
-      where: { OR: [{ googleId: profile.id }, { email: profile.email.toLowerCase() }] },
+    const user = await upsertGoogleUser({
+      id: profile.id,
+      email: profile.email,
+      name: profile.name,
+      picture: profile.picture,
     });
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email: profile.email.toLowerCase(),
-          name: profile.name || profile.email.split('@')[0],
-          passwordHash: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12),
-          googleId: profile.id,
-          avatarUrl: profile.picture ?? null,
-          emailVerifiedAt: new Date(),
-          role: 'USER',
-        },
-      });
-    } else {
-      user = await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          googleId: user.googleId ?? profile.id,
-          emailVerifiedAt: user.emailVerifiedAt ?? new Date(),
-          avatarUrl: user.avatarUrl ?? profile.picture ?? null,
-        },
-      });
-    }
-
-    const accessToken = signAccessToken(user);
-    const refreshToken = signRefreshToken(user.id);
-    await persistRefreshToken(user.id, refreshToken);
+    const { accessToken, refreshToken } = await issueTokens(user);
     res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions);
     const dest = new URL(`${frontend}/auth/google/done`);
     dest.searchParams.set('accessToken', accessToken);
     res.redirect(dest.toString());
+  } catch (error) {
+    next(error);
+  }
+}
+
+/** Google One Tap / GIS button — verifies ID token from an active browser Google session. */
+export async function googleIdTokenLogin(req: Request, res: Response, next: NextFunction) {
+  try {
+    if (!env.googleClientId) {
+      throw new ValidationError('Google sign-in is not configured');
+    }
+    const credential = String(req.body?.credential ?? '');
+    if (!credential) {
+      throw new ValidationError('Missing Google credential');
+    }
+
+    const infoRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+    const info = (await infoRes.json()) as {
+      aud?: string;
+      sub?: string;
+      email?: string;
+      email_verified?: string | boolean;
+      name?: string;
+      picture?: string;
+      error?: string;
+    };
+    if (!infoRes.ok || info.error || info.aud !== env.googleClientId || !info.sub || !info.email) {
+      throw new AppError(401, 'Invalid Google credential');
+    }
+    const verified = info.email_verified === true || info.email_verified === 'true';
+    if (!verified) {
+      throw new AppError(401, 'Google email is not verified');
+    }
+
+    const user = await upsertGoogleUser({
+      id: info.sub,
+      email: info.email,
+      name: info.name,
+      picture: info.picture,
+    });
+    const { accessToken, refreshToken } = await issueTokens(user);
+    res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions);
+    return sendSuccess(res, {
+      accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        avatarUrl: user.avatarUrl,
+      },
+    });
   } catch (error) {
     next(error);
   }

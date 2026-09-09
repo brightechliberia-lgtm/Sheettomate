@@ -401,7 +401,11 @@ export async function health(_req: Request, res: Response, next: NextFunction) {
       load: os.loadavg(),
       paymentsMode: env.paymentsMode,
       banffpayConfigured: Boolean(env.banffpayApiKey),
-      orangeConfigured: Boolean(env.orangeMoneyApiKey),
+      orangeConfigured: Boolean(env.orangeMoneyApiKey && env.orangeMoneyMerchantId),
+      paymentsLiveReady:
+        env.paymentsMode === 'live' &&
+        (Boolean(env.banffpayApiKey) || Boolean(env.orangeMoneyApiKey && env.orangeMoneyMerchantId)),
+      webhookUrl: `${env.publicApiUrl}/api/payments/webhook`,
       redis: Boolean(env.redisUrl),
       failedPayments24h: failedPay,
       errors,

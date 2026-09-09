@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
+import { downloadTemplateFile } from '../lib/download';
+
+interface PaymentItem {
+  id: string;
+  title: string;
+  templateId?: string | null;
+  courseId?: string | null;
+}
 
 interface Payment {
   id: string;
@@ -13,24 +21,37 @@ interface Payment {
   qrPayload?: string | null;
   checkoutUrl?: string | null;
   failureReason?: string | null;
+  items?: PaymentItem[];
 }
 
 export default function PaymentStatusPage() {
   const { id } = useParams();
   const [payment, setPayment] = useState<Payment | null>(null);
   const [error, setError] = useState('');
+  const [sandbox, setSandbox] = useState(false);
+  const [downloadMsg, setDownloadMsg] = useState('');
+
+  useEffect(() => {
+    api<{ payments: { sandbox: boolean } }>('/payments/config')
+      .then((d) => setSandbox(Boolean(d.payments.sandbox)))
+      .catch(() => setSandbox(false));
+  }, []);
 
   useEffect(() => {
     if (!id) return;
     let delay = 1500;
     let timer: number;
-    let stopped = false;
 
     async function tick() {
       try {
         const data = await api<{ payment: Payment }>(`/payments/status/${id}`);
         setPayment(data.payment);
         if (data.payment.status === 'PENDING') {
+          if (data.payment.reference) {
+            void api(`/payments/verify/${data.payment.reference}`, { method: 'POST', body: JSON.stringify({}) }).catch(
+              () => undefined,
+            );
+          }
           delay = Math.min(delay * 1.6, 12_000);
           timer = window.setTimeout(() => void tick(), delay);
         }
@@ -40,9 +61,7 @@ export default function PaymentStatusPage() {
     }
     void tick();
     return () => {
-      stopped = true;
       window.clearTimeout(timer);
-      void stopped;
     };
   }, [id]);
 
@@ -56,15 +75,44 @@ export default function PaymentStatusPage() {
     setPayment(data.payment);
   }
 
+  async function downloadItem(templateId: string) {
+    setDownloadMsg('');
+    try {
+      await downloadTemplateFile(templateId);
+      setDownloadMsg('Download started.');
+    } catch (err) {
+      setDownloadMsg(err instanceof Error ? err.message : 'Download failed');
+    }
+  }
+
   if (error) return <p className="text-red-600">{error}</p>;
   if (!payment) return <p>Checking payment…</p>;
 
   if (payment.status === 'COMPLETED') {
+    const templates = (payment.items ?? []).filter((item) => item.templateId);
     return (
-      <div className="rounded-2xl border bg-white p-8 text-center">
+      <div className="rounded-2xl border bg-white p-8 text-center space-y-4">
         <h1 className="text-2xl font-bold text-brand-700">Payment received</h1>
         <p className="mt-2">Reference {payment.reference}</p>
-        <Link to="/payments/history" className="mt-4 inline-block font-semibold text-brand-700">
+        {templates.length > 0 && (
+          <div className="space-y-2">
+            {templates.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => void downloadItem(String(item.templateId))}
+                className="block w-full rounded-lg bg-brand-600 px-4 py-2 text-white font-semibold"
+              >
+                Download {item.title}
+              </button>
+            ))}
+            {downloadMsg && <p className="text-sm text-stone-600">{downloadMsg}</p>}
+          </div>
+        )}
+        <Link to="/dashboard" className="mt-2 inline-block font-semibold text-brand-700">
+          Go to dashboard
+        </Link>
+        <Link to="/payments/history" className="block text-sm text-stone-600">
           View history
         </Link>
       </div>
@@ -87,7 +135,7 @@ export default function PaymentStatusPage() {
     <div className="rounded-2xl border bg-white p-8 space-y-4">
       <h1 className="text-2xl font-bold">Waiting for payment</h1>
       <p className="text-sm text-stone-600">
-        {payment.amount} {payment.currency} via {payment.gateway.replace('_', ' ')}
+        {payment.amount} {payment.currency} via {payment.gateway.replace(/_/g, ' ')}
       </p>
       <div className="h-2 rounded bg-stone-100 overflow-hidden">
         <div className="h-2 w-1/2 bg-brand-600 animate-pulse" />
@@ -113,12 +161,14 @@ export default function PaymentStatusPage() {
       )}
       {payment.checkoutUrl && (
         <a href={payment.checkoutUrl} className="text-brand-700 font-semibold">
-          Open secure card page
+          Open secure checkout
         </a>
       )}
-      <button type="button" onClick={simulate} className="rounded border px-4 py-2 text-sm">
-        Sandbox: mark paid
-      </button>
+      {sandbox && (
+        <button type="button" onClick={simulate} className="rounded border px-4 py-2 text-sm">
+          Sandbox: mark paid
+        </button>
+      )}
     </div>
   );
 }

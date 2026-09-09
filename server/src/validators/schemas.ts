@@ -111,6 +111,17 @@ export const createTemplateSchema = z.object({
   version: z.string().max(20).optional(),
   language: z.string().max(20).optional(),
   isAiGenerated: z.coerce.boolean().optional(),
+  createGoogleSheet: z
+    .union([z.boolean(), z.string()])
+    .optional()
+    .transform((v) => v === true || v === 'true' || v === 'on' || v === '1'),
+  published: z
+    .union([z.boolean(), z.string()])
+    .optional()
+    .transform((v) => {
+      if (v === undefined) return undefined;
+      return v === true || v === 'true' || v === 'on' || v === '1';
+    }),
 });
 
 export const updateTemplateSchema = createTemplateSchema.partial();

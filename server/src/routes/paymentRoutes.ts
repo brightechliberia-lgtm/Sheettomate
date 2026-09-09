@@ -9,6 +9,7 @@ import {
   getWallet,
   history,
   initiate,
+  paymentsConfig,
   topUpWallet,
   verifyPayment,
   webhook,
@@ -16,6 +17,7 @@ import {
 
 const router = Router();
 
+router.get('/config', paymentsConfig);
 router.post('/webhook', webhook);
 router.post('/initiate', authenticate, validate(initiatePaymentSchema), initiate);
 router.post('/checkout', authenticate, validate(initiatePaymentSchema), initiate);

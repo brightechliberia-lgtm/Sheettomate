@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { MarketplaceTemplate } from '@sheetomate/shared';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { useLowData } from '../context/LowDataContext';
 import { api } from '../lib/api';
 import { cacheTemplate } from '../lib/offline';
@@ -14,6 +15,7 @@ export default function TemplateCard({
   onPreview?: (template: MarketplaceTemplate) => void;
 }) {
   const { add, has } = useCart();
+  const { formatUsd } = useCurrency();
   const { lowData } = useLowData();
   const preview = template.previewUrl;
 
@@ -49,7 +51,7 @@ export default function TemplateCard({
           {template.averageRating.toFixed(1)}★ · {template.downloadCount} downloads
         </p>
         <div className="mt-auto pt-4 flex items-center justify-between gap-2">
-          <span className="font-semibold">${Number(template.price).toFixed(2)}</span>
+          <span className="font-semibold">{formatUsd(Number(template.price))}</span>
           <button type="button" onClick={() => add(template.id)} className="text-sm font-semibold text-brand-700 min-h-11">
             {has(template.id) ? 'In cart' : 'Add to cart'}
           </button>

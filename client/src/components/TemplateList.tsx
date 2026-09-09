@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import type { MarketplaceTemplate } from '@sheetomate/shared';
 import TemplateCard from './TemplateCard';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 export default function TemplateList({
   items,
@@ -23,6 +24,7 @@ export default function TemplateList({
   const pages = Math.max(1, Math.ceil(total / pageSize));
 
   const { add, has } = useCart();
+  const { formatUsd } = useCurrency();
 
   return (
     <div>
@@ -35,10 +37,12 @@ export default function TemplateList({
               <button type="button" className="text-left" onClick={() => onPreview(template)}>
                 <p className="text-xs uppercase text-brand-600 font-semibold">{template.category}</p>
                 <p className="font-bold">{template.title}</p>
-                <p className="text-sm text-stone-500">{template.averageRating.toFixed(1)}★ · {template.downloadCount} downloads</p>
+                <p className="text-sm text-stone-500">
+                  {template.averageRating.toFixed(1)}★ · {template.downloadCount} downloads
+                </p>
               </button>
               <div className="flex items-center gap-3">
-                <span className="font-semibold">${Number(template.price).toFixed(2)}</span>
+                <span className="font-semibold">{formatUsd(Number(template.price))}</span>
                 <Link to={`/templates/${template.id}`} className="text-sm font-semibold text-brand-700">
                   View
                 </Link>
