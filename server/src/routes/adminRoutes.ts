@@ -72,5 +72,6 @@ router.put('/ai/prompts', requireStaff('ai'), upsertPromptTemplate);
 router.delete('/ai/prompts/:id', requireStaff('ai'), deletePromptTemplate);
 router.put('/ai/settings', requireStaff('ai'), updateAiSettings);
 router.post('/ai/test', requireStaff('ai'), testAiProvider);
+router.post('/google-sheets/test', requireStaff('settings'), d.testGoogleSheets);
 
 export default router;

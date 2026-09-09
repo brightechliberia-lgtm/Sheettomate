@@ -6,7 +6,7 @@ import { sendSuccess } from '../utils/http';
 import { subscribeEmail } from '../services/marketingService';
 import { logger } from '../config/logger';
 import { getCatalogConfig } from '../services/catalogSettings';
-import { googleSheetsConfigured } from '../services/googleSheetsService';
+import { getGoogleSheetsStatus } from '../services/googleSheetsService';
 
 const subscribeSchema = z.object({
   email: z.string().email(),
@@ -26,11 +26,13 @@ router.get('/catalog', async (_req: Request, res: Response, next: NextFunction) 
 });
 
 router.get('/fx', (_req: Request, res: Response) => {
+  const sheets = getGoogleSheetsStatus();
   return sendSuccess(res, {
     base: 'USD',
     quote: 'LRD',
     rate: env.fxUsdLrd,
-    googleSheetsUpload: googleSheetsConfigured(),
+    googleSheetsUpload: sheets.ready,
+    googleSheets: sheets,
   });
 });
 

@@ -115,10 +115,12 @@ export default function AdminAiPage() {
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">AI admin</h1>
+      {loadError && <p className="text-sm text-red-600">{loadError}</p>}
 
       <section className="rounded-2xl border bg-white p-6 space-y-3">
         <h2 className="font-bold text-lg">API providers</h2>
-        {providers ? (
+        {!loaded && <p className="text-sm text-stone-500">Loading provider status…</p>}
+        {loaded && providers ? (
           <>
             <p className="text-sm text-stone-600">{providers.note}</p>
             <div className="flex flex-wrap gap-2 text-xs font-semibold">
@@ -156,8 +158,9 @@ export default function AdminAiPage() {
             </div>
             {testMsg && <p className="text-sm text-stone-700">{testMsg}</p>}
           </>
-        ) : (
-          <p className="text-sm text-stone-500">Loading provider status…</p>
+        ) : null}
+        {loaded && !providers && !loadError && (
+          <p className="text-sm text-stone-500">Provider status unavailable.</p>
         )}
       </section>
 

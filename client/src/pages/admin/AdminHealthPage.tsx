@@ -2,6 +2,16 @@ import { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import StaffGate from '../../admin/StaffGate';
 
+type GoogleSheetsStatus = {
+  configured?: boolean;
+  ready?: boolean;
+  mode?: string;
+  serviceAccountEmail?: string | null;
+  driveFolderConfigured?: boolean;
+  note?: string;
+  setup?: Record<string, string>;
+};
+
 type HealthData = {
   uptimeSec?: number;
   memoryMb?: number;
@@ -16,6 +26,7 @@ type HealthData = {
   aiProvider?: string;
   aiLive?: boolean;
   redis?: boolean;
+  googleSheets?: GoogleSheetsStatus;
   failedPayments24h?: number;
   errors?: { id?: string; message?: string; createdAt?: string; source?: string }[];
   sentryHint?: string;
@@ -36,11 +47,33 @@ function StatusPill({ ok, label }: { ok: boolean; label: string }) {
 
 export default function AdminHealthPage() {
   const [data, setData] = useState<HealthData | null>(null);
+  const [sheetsMsg, setSheetsMsg] = useState('');
+  const [testingSheets, setTestingSheets] = useState(false);
+
   useEffect(() => {
     api<HealthData>('/admin/health')
       .then(setData)
       .catch(() => setData(null));
   }, []);
+
+  async function testSheets() {
+    setTestingSheets(true);
+    setSheetsMsg('');
+    try {
+      const result = await api<{ ok: boolean; message: string; status: GoogleSheetsStatus }>('/admin/google-sheets/test', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+      setSheetsMsg(result.message);
+      if (result.status) {
+        setData((current) => (current ? { ...current, googleSheets: result.status } : current));
+      }
+    } catch (err) {
+      setSheetsMsg(err instanceof Error ? err.message : 'Google Sheets test failed');
+    } finally {
+      setTestingSheets(false);
+    }
+  }
 
   const uptime =
     data?.uptimeSec != null
@@ -97,10 +130,48 @@ export default function AdminHealthPage() {
                   : `AI starter mode${data.openaiConfigured || data.anthropicConfigured ? '' : ' — add API keys'}`
               }
             />
+            <StatusPill
+              ok={Boolean(data.googleSheets?.ready)}
+              label={
+                data.googleSheets?.ready
+                  ? `Google Sheets ready (${data.googleSheets.mode})`
+                  : data.googleSheets?.configured
+                    ? 'Google Sheets needs Drive folder'
+                    : 'Google Sheets not configured'
+              }
+            />
           </div>
           {data.webhookUrl && (
             <p className="mt-3 text-xs text-stone-500 break-all">Webhook URL for providers: {data.webhookUrl}</p>
           )}
+
+          <section className="mt-4 rounded-2xl border bg-white p-4 space-y-2">
+            <h2 className="font-semibold">Google Sheets upload</h2>
+            <p className="text-sm text-stone-600">{data.googleSheets?.note}</p>
+            {data.googleSheets?.serviceAccountEmail && (
+              <p className="text-xs text-stone-500">
+                SA: <code>{data.googleSheets.serviceAccountEmail}</code>
+                {data.googleSheets.driveFolderConfigured ? ' · folder set' : ' · folder missing'}
+              </p>
+            )}
+            <button
+              type="button"
+              disabled={testingSheets}
+              onClick={() => void testSheets()}
+              className="rounded border px-3 py-1.5 text-sm font-semibold disabled:opacity-50"
+            >
+              {testingSheets ? 'Testing…' : 'Test Google Sheets'}
+            </button>
+            {sheetsMsg && <p className="text-sm text-stone-700">{sheetsMsg}</p>}
+            <ol className="text-xs text-stone-500 list-decimal pl-4 space-y-1">
+              <li>Google Cloud → create service account → download JSON key</li>
+              <li>Enable Sheets API + Drive API</li>
+              <li>Create a Drive folder, share with the SA email as Editor</li>
+              <li>
+                Railway: <code>GOOGLE_SERVICE_ACCOUNT_JSON</code> + <code>GOOGLE_DRIVE_FOLDER_ID</code>
+              </li>
+            </ol>
+          </section>
 
           {data.load && (
             <p className="mt-3 text-sm text-stone-600">

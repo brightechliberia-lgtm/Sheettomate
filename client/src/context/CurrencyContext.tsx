@@ -40,13 +40,13 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     const apiBase = import.meta.env.VITE_API_URL ?? '/api';
     void fetch(`${apiBase}/marketing/fx`)
       .then((res) => res.json())
-      .then((body: { data?: { rate?: number; googleSheetsUpload?: boolean } }) => {
+      .then((body: { data?: { rate?: number; googleSheetsUpload?: boolean; googleSheets?: { ready?: boolean } } }) => {
         const nextRate = Number(body.data?.rate);
         if (Number.isFinite(nextRate) && nextRate > 0) {
           localStorage.setItem(FX_RATE_KEY, String(nextRate));
           setRate(nextRate);
         }
-        setGoogleSheetsUpload(Boolean(body.data?.googleSheetsUpload));
+        setGoogleSheetsUpload(Boolean(body.data?.googleSheets?.ready ?? body.data?.googleSheetsUpload));
       })
       .catch(() => undefined);
   }, []);

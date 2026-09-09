@@ -157,12 +157,12 @@ export async function createTemplate(req: Request, res: Response, next: NextFunc
       }
       if (!googleSheetsConfigured()) {
         throw new ValidationError(
-          'Google Sheets auto-create is not configured on the server. Ask an admin to set GOOGLE_SHEETS_REFRESH_TOKEN or a service account.',
+          'Google Sheets auto-create is not configured. Set GOOGLE_SERVICE_ACCOUNT_JSON and GOOGLE_DRIVE_FOLDER_ID on the API.',
         );
       }
       const sheet = await createGoogleSheetFromUpload(uploadFile, body.title);
-      if (!sheet?.url) {
-        throw new ValidationError('Could not create the Google Sheet. Try again or upload without that option.');
+      if (!sheet.ok) {
+        throw new ValidationError(sheet.error);
       }
       demoUrl = sheet.url;
     }
@@ -217,12 +217,12 @@ export async function updateTemplate(req: Request, res: Response, next: NextFunc
       }
       if (!googleSheetsConfigured()) {
         throw new ValidationError(
-          'Google Sheets auto-create is not configured on the server. Ask an admin to set GOOGLE_SHEETS_REFRESH_TOKEN or a service account.',
+          'Google Sheets auto-create is not configured. Set GOOGLE_SERVICE_ACCOUNT_JSON and GOOGLE_DRIVE_FOLDER_ID on the API.',
         );
       }
       const sheet = await createGoogleSheetFromUpload(uploadFile, body.title ?? existing.title);
-      if (!sheet?.url) {
-        throw new ValidationError('Could not create the Google Sheet. Try again or save without that option.');
+      if (!sheet.ok) {
+        throw new ValidationError(sheet.error);
       }
       demoUrl = sheet.url;
     }

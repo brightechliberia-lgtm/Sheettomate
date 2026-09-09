@@ -111,9 +111,18 @@ export const env = {
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
   /** Optional: refresh token with Sheets + Drive scopes for auto-creating Sheets on upload. */
   googleSheetsRefreshToken: process.env.GOOGLE_SHEETS_REFRESH_TOKEN ?? '',
-  /** Optional service account for Sheets auto-create (alternative to refresh token). */
+  /** Full service-account JSON key (preferred on Railway). */
+  googleServiceAccountJson: process.env.GOOGLE_SERVICE_ACCOUNT_JSON ?? '',
+  /** Optional service account for Sheets auto-create (alternative to JSON / refresh token). */
   googleServiceAccountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ?? '',
   googleServiceAccountPrivateKey: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ?? '',
+  googleServiceAccountPrivateKeyBase64: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY_BASE64 ?? '',
+  /**
+   * Drive folder ID shared with the service account (Editor).
+   * Required for reliable SA creates — SAs have no personal Drive quota.
+   * From URL: https://drive.google.com/drive/folders/FOLDER_ID
+   */
+  googleDriveFolderId: process.env.GOOGLE_DRIVE_FOLDER_ID ?? '',
 };
 
 export const isProduction = env.nodeEnv === 'production';

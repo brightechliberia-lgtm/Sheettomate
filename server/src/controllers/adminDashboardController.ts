@@ -411,6 +411,7 @@ export async function health(_req: Request, res: Response, next: NextFunction) {
       anthropicConfigured: Boolean(env.anthropicApiKey),
       aiProvider: env.aiProvider,
       aiLive: Boolean(env.openaiApiKey || env.anthropicApiKey) && env.aiProvider !== 'fallback',
+      googleSheets: (await import('../services/googleSheetsService')).getGoogleSheetsStatus(),
       failedPayments24h: failedPay,
       errors,
       sentryHint: 'Set SENTRY_DSN / VITE_SENTRY_DSN to forward browser and API errors.',
@@ -467,6 +468,16 @@ export async function listScheduled(_req: Request, res: Response, next: NextFunc
   try {
     const items = await prisma.scheduledReport.findMany({ orderBy: { createdAt: 'desc' } });
     return sendSuccess(res, { items });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function testGoogleSheets(_req: Request, res: Response, next: NextFunction) {
+  try {
+    const { pingGoogleSheets } = await import('../services/googleSheetsService');
+    const result = await pingGoogleSheets();
+    return sendSuccess(res, result, result.ok ? 200 : 502, result.message);
   } catch (error) {
     next(error);
   }

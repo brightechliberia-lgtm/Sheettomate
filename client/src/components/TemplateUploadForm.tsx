@@ -242,7 +242,13 @@ export default function TemplateUploadForm({
           Auto-create a Google Sheets version from this file
           {!googleSheetsUpload && (
             <span className="block text-stone-500">
-              Requires Google Sheets credentials on the API server. When set, the sheet link is saved as the demo URL.
+              Not ready on the API yet. Admin must set a Google service account + shared Drive folder
+              (<code>GOOGLE_SERVICE_ACCOUNT_JSON</code>, <code>GOOGLE_DRIVE_FOLDER_ID</code>).
+            </span>
+          )}
+          {googleSheetsUpload && (
+            <span className="block text-stone-500">
+              When ticked, a viewable Google Sheet is created and saved as the demo link.
             </span>
           )}
           {editing && !file && <span className="block text-stone-500">Upload a new file to regenerate the Sheet.</span>}
