@@ -25,7 +25,13 @@ export async function getDailyLimit(role: Role): Promise<number> {
 export async function countToday(userId: string): Promise<number> {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
-  return prisma.aIRequest.count({ where: { userId, createdAt: { gte: start } } });
+  return prisma.aIRequest.count({
+    where: {
+      userId,
+      createdAt: { gte: start },
+      status: { in: ['PENDING', 'PROCESSING', 'COMPLETED'] },
+    },
+  });
 }
 
 export async function processAiGeneration(requestId: string): Promise<void> {
@@ -108,7 +114,9 @@ export async function processAiGeneration(requestId: string): Promise<void> {
         title: spec.title,
         description: spec.description,
         category: spec.category || category,
-        tags: spec.tags ?? [],
+        tags: Array.from(
+          new Set([...(spec.tags ?? []), 'ai-generated', llm.provider === 'fallback' ? 'ai-starter' : 'ai-llm']),
+        ),
         price: 0,
         fileUrl: stored.url,
         fileKey: stored.key,
@@ -127,8 +135,10 @@ export async function processAiGeneration(requestId: string): Promise<void> {
       where: { id: requestId },
       data: {
         status: 'COMPLETED',
-        progress: 'done',
+        progress: llm.provider === 'fallback' ? 'done:starter' : 'done',
         generatedTemplateId: template.id,
+        tokensUsed: llm.tokensUsed,
+        costUsd: llm.costUsd,
       },
     });
     await invalidateTemplateCache();

@@ -61,6 +61,12 @@ export const env = {
   openaiModel: process.env.OPENAI_MODEL ?? 'gpt-4o-mini',
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? '',
   anthropicModel: process.env.ANTHROPIC_MODEL ?? 'claude-3-5-sonnet-latest',
+  /** auto | openai | anthropic | fallback */
+  aiProvider: (process.env.AI_PROVIDER ?? 'auto').toLowerCase(),
+  aiTimeoutMs: Number(process.env.AI_TIMEOUT_MS ?? 60_000),
+  aiMaxTokens: Number(process.env.AI_MAX_TOKENS ?? 4000),
+  /** When false, failed LLM calls throw instead of using ExcelJS starter templates. */
+  aiAllowFallback: process.env.AI_ALLOW_FALLBACK !== 'false',
   aiDailyLimitUser: Number(process.env.AI_DAILY_LIMIT_USER ?? 8),
   aiDailyLimitCreator: Number(process.env.AI_DAILY_LIMIT_CREATOR ?? 25),
   aiDailyLimitAdmin: Number(process.env.AI_DAILY_LIMIT_ADMIN ?? 100),

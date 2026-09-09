@@ -2,22 +2,24 @@ import { AI_SUGGESTIONS } from '@sheetomate/shared';
 import { WORKBOOK_SPEC_INSTRUCTIONS } from './spec';
 
 const BASE_SYSTEM = `You are Sheettomate, an Excel/Google Sheets template designer for Liberia and West Africa.
-Prefer dual currency (USD + LRD), mobile money, informal trade, NGOs, and small shops.
-Build practical workbooks inspired by professional "Excel Skill" structures: clear headers, sample data, formulas, and a summary tab.
+Prefer dual currency (USD + LRD), Orange Money, Lonestar MTN Mobile Money, informal trade, NGOs, schools, clinics, and small shops in Monrovia and counties.
+Use realistic Liberian names, +231 phone numbers, LRD amounts where local, and USD for donor/import costs.
+Label LRD headers clearly (e.g. "Amount (LRD)" or "L$") so currency formatting can apply.
+Build practical workbooks: clear headers, 6–12 sample rows, formulas, and a Summary tab.
 ${WORKBOOK_SPEC_INSTRUCTIONS}`;
 
 export const INDUSTRY_SYSTEM: Record<string, string> = {
   Finance:
-    'Finance: include income statement or cashbook, variance vs budget, and a simple DCF or transaction categories when relevant.',
+    'Finance: cashbooks with USD+LRD, mobile-money fees, income vs expense, variance vs budget, school/clinic fee registers when relevant.',
   FMCG:
-    'FMCG: sales by route/outlet/SKU, route-to-market, and a demand forecast tab with weekly targets.',
+    'FMCG: sales by route/outlet/SKU across Liberian markets, route-to-market, weekly targets in LRD, and collection method (cash/Orange/MTN).',
   'E-commerce':
-    'E-commerce: orders, customer analysis, and inventory on hand vs committed stock.',
-  SaaS: 'SaaS: MRR, churn, and a cohort grid (months as columns, acquisition month as rows).',
-  Agriculture: 'Agriculture: crop yield, input costs (seed, fertilizer, labour), and a seasonal calendar.',
-  NGO: 'NGO: donors, grant periods, reporting deadlines, restricted vs unrestricted spend.',
-  HR: 'HR: attendance by employee/day, leave, and a monthly summary with totals.',
-  Inventory: 'Inventory: SKU, supplier contacts, reorder point, and alerts when qty < reorder.',
+    'E-commerce: WhatsApp/social orders, +231 phones, delivery areas (Monrovia suburbs), inventory on hand vs committed stock.',
+  SaaS: 'SaaS: MRR, churn, and a cohort grid (months as columns, acquisition month as rows); keep pricing simple in USD.',
+  Agriculture: 'Agriculture: crop yield, input costs in LRD (seed, fertilizer, labour), and a seasonal calendar for Liberian crops.',
+  NGO: 'NGO: donors, grant periods, reporting deadlines, restricted vs unrestricted spend, dual currency (USD awards, LRD local spend).',
+  HR: 'HR: attendance by employee/day, leave, late marks, and a monthly summary with totals for Liberian SMEs.',
+  Inventory: 'Inventory: SKU, supplier contacts (+231), reorder point, rice/palm-oil/soap style goods, alerts when qty < reorder.',
 };
 
 export function detectIndustry(prompt: string, explicit?: string): string {
@@ -74,8 +76,8 @@ export function buildUserPrompt(prompt: string, industry: string, previousSpec?:
 
 export const DEFAULT_PROMPT_TEMPLATES = [
   {
-    slug: 'finance-budget',
-    title: 'Small business budget',
+    slug: 'finance-cashbook',
+    title: 'Monrovia shop cashbook',
     category: 'Finance',
     industry: 'Finance',
     examplePrompt: AI_SUGGESTIONS[0].prompt,
@@ -92,8 +94,8 @@ export const DEFAULT_PROMPT_TEMPLATES = [
     sortOrder: 2,
   },
   {
-    slug: 'inventory-reorder',
-    title: 'Inventory reorder',
+    slug: 'inventory-market',
+    title: 'Market stall inventory',
     category: 'Inventory',
     industry: 'Inventory',
     examplePrompt: AI_SUGGESTIONS[2].prompt,
@@ -102,7 +104,7 @@ export const DEFAULT_PROMPT_TEMPLATES = [
   },
   {
     slug: 'hr-attendance',
-    title: 'Attendance',
+    title: 'Staff attendance',
     category: 'HR',
     industry: 'HR',
     examplePrompt: AI_SUGGESTIONS[3].prompt,
@@ -111,20 +113,20 @@ export const DEFAULT_PROMPT_TEMPLATES = [
   },
   {
     slug: 'fmcg-rtm',
-    title: 'FMCG sales',
+    title: 'FMCG route sales',
     category: 'FMCG',
     industry: 'FMCG',
-    examplePrompt: AI_SUGGESTIONS[5].prompt,
+    examplePrompt: AI_SUGGESTIONS[4].prompt,
     systemPrompt: INDUSTRY_SYSTEM.FMCG,
     sortOrder: 5,
   },
   {
-    slug: 'saas-cohort',
-    title: 'SaaS cohorts',
+    slug: 'finance-fees',
+    title: 'School / clinic fees',
     category: 'Finance',
-    industry: 'SaaS',
-    examplePrompt: AI_SUGGESTIONS[7].prompt,
-    systemPrompt: INDUSTRY_SYSTEM.SaaS,
+    industry: 'Finance',
+    examplePrompt: AI_SUGGESTIONS[5].prompt,
+    systemPrompt: INDUSTRY_SYSTEM.Finance,
     sortOrder: 6,
   },
   {
@@ -132,8 +134,17 @@ export const DEFAULT_PROMPT_TEMPLATES = [
     title: 'Crop yield',
     category: 'Agriculture',
     industry: 'Agriculture',
-    examplePrompt: AI_SUGGESTIONS[8].prompt,
+    examplePrompt: AI_SUGGESTIONS[6].prompt,
     systemPrompt: INDUSTRY_SYSTEM.Agriculture,
     sortOrder: 7,
+  },
+  {
+    slug: 'ecom-orders',
+    title: 'WhatsApp orders',
+    category: 'E-commerce',
+    industry: 'E-commerce',
+    examplePrompt: AI_SUGGESTIONS[7].prompt,
+    systemPrompt: INDUSTRY_SYSTEM['E-commerce'],
+    sortOrder: 8,
   },
 ];

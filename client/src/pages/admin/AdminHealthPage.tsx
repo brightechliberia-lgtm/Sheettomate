@@ -11,6 +11,10 @@ type HealthData = {
   orangeConfigured?: boolean;
   paymentsLiveReady?: boolean;
   webhookUrl?: string;
+  openaiConfigured?: boolean;
+  anthropicConfigured?: boolean;
+  aiProvider?: string;
+  aiLive?: boolean;
   redis?: boolean;
   failedPayments24h?: number;
   errors?: { id?: string; message?: string; createdAt?: string; source?: string }[];
@@ -85,6 +89,14 @@ export default function AdminHealthPage() {
               }
             />
             <StatusPill ok={Boolean(data.redis)} label={data.redis ? 'Redis connected' : 'Redis optional / off'} />
+            <StatusPill
+              ok={Boolean(data.aiLive)}
+              label={
+                data.aiLive
+                  ? `AI live (${data.aiProvider ?? 'auto'})`
+                  : `AI starter mode${data.openaiConfigured || data.anthropicConfigured ? '' : ' — add API keys'}`
+              }
+            />
           </div>
           {data.webhookUrl && (
             <p className="mt-3 text-xs text-stone-500 break-all">Webhook URL for providers: {data.webhookUrl}</p>

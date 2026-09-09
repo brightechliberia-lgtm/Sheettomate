@@ -31,7 +31,9 @@ export async function buildWorkbookBuffer(spec: WorkbookSpec): Promise<Buffer> {
     }
 
     (sheetSpec.currencyColumns ?? []).forEach((col) => {
-      sheet.getColumn(col).numFmt = '"$"#,##0.00';
+      const header = String(sheetSpec.headers[col - 1] ?? '').toUpperCase();
+      const isLrd = header.includes('LRD') || header.includes('L$') || header.includes('LIBERIAN');
+      sheet.getColumn(col).numFmt = isLrd ? '"L$"#,##0.00' : '"$"#,##0.00';
     });
 
     (sheetSpec.columnWidths ?? sheetSpec.headers.map(() => 18)).forEach((width, index) => {

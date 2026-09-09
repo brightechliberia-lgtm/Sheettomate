@@ -6,6 +6,9 @@ import { ConflictError, ForbiddenError, NotFoundError } from '../utils/errors';
 import { updateRoleSchema, aiPromptTemplateSchema, aiSettingsSchema, adminUpdateUserSchema } from '../validators/schemas';
 import { toPublicUser } from '../utils/userMapper';
 import { revokeAllRefreshTokens } from '../services/tokenService';
+import { getAiProviderStatus } from '../ai/providers';
+import { pingAiProvider } from '../ai/llmClient';
+import { z } from 'zod';
 
 export async function listUsers(req: Request, res: Response, next: NextFunction) {
   try {
@@ -127,7 +130,14 @@ export async function aiUsage(_req: Request, res: Response, next: NextFunction) 
       }),
     ]);
     const settings = await prisma.platformSetting.findMany();
-    return sendSuccess(res, { today, totals, byStatus, recent, settings });
+    return sendSuccess(res, {
+      today,
+      totals,
+      byStatus,
+      recent,
+      settings,
+      providers: getAiProviderStatus(),
+    });
   } catch (error) {
     next(error);
   }
@@ -211,6 +221,20 @@ export async function updateAiSettings(req: Request, res: Response, next: NextFu
     ].filter(Boolean);
     await Promise.all(writes.filter((item) => item !== null));
     return sendSuccess(res, { saved: true });
+  } catch (error) {
+    next(error);
+  }
+}
+
+const aiTestSchema = z.object({
+  provider: z.enum(['openai', 'anthropic']).default('openai'),
+});
+
+export async function testAiProvider(req: Request, res: Response, next: NextFunction) {
+  try {
+    const body = aiTestSchema.parse(req.body ?? {});
+    const result = await pingAiProvider(body.provider);
+    return sendSuccess(res, { result, providers: getAiProviderStatus() }, result.ok ? 200 : 502, result.message);
   } catch (error) {
     next(error);
   }

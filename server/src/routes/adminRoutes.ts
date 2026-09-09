@@ -13,6 +13,7 @@ import {
   upsertPromptTemplate,
   deletePromptTemplate,
   updateAiSettings,
+  testAiProvider,
 } from '../controllers/adminController';
 import * as d from '../controllers/adminDashboardController';
 
@@ -70,5 +71,6 @@ router.post('/ai/prompts', requireStaff('ai'), upsertPromptTemplate);
 router.put('/ai/prompts', requireStaff('ai'), upsertPromptTemplate);
 router.delete('/ai/prompts/:id', requireStaff('ai'), deletePromptTemplate);
 router.put('/ai/settings', requireStaff('ai'), updateAiSettings);
+router.post('/ai/test', requireStaff('ai'), testAiProvider);
 
 export default router;

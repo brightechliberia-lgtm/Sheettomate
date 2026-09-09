@@ -7,6 +7,7 @@ import { sendSuccess } from '../utils/http';
 import { enqueueAiJob } from '../services/aiQueue';
 import { countToday, getDailyLimit } from '../services/aiPipeline';
 import { detectCategory, detectIndustry } from '../ai/prompts';
+import { getAiProviderStatus } from '../ai/providers';
 import { withCdn } from '../services/templateService';
 import { invalidateTemplateCache } from '../services/cacheService';
 import {
@@ -96,8 +97,10 @@ export async function getStatus(req: Request, res: Response, next: NextFunction)
         status: request.status,
         progress: request.progress,
         errorMessage: request.errorMessage,
+        prompt: request.prompt,
         tokensUsed: request.tokensUsed,
         costUsd: request.costUsd,
+        generatedTemplateId: request.generatedTemplateId,
       },
     });
   } catch (error) {
@@ -193,16 +196,22 @@ export async function suggestions(_req: Request, res: Response, next: NextFuncti
       where: { enabled: true },
       orderBy: { sortOrder: 'asc' },
     });
-    const items = db.length
-      ? db.map((row) => ({
-          id: row.slug,
-          title: row.title,
-          category: row.category,
-          industry: row.industry,
-          prompt: row.examplePrompt,
-        }))
-      : [...AI_SUGGESTIONS];
-    return sendSuccess(res, { items });
+    const dbItems = db.map((row) => ({
+      id: row.slug,
+      title: row.title,
+      category: row.category,
+      industry: row.industry,
+      prompt: row.examplePrompt,
+    }));
+    const dbIds = new Set(dbItems.map((item) => item.id));
+    const extras = AI_SUGGESTIONS.filter((item) => !dbIds.has(item.id)).map((item) => ({
+      id: item.id,
+      title: item.title,
+      category: item.category,
+      industry: item.industry,
+      prompt: item.prompt,
+    }));
+    return sendSuccess(res, { items: [...dbItems, ...extras] });
   } catch (error) {
     next(error);
   }
@@ -218,7 +227,11 @@ export async function myAiRequests(req: Request, res: Response, next: NextFuncti
     });
     const limit = await getDailyLimit(req.user!.role);
     const used = await countToday(req.user!.sub);
-    return sendSuccess(res, { items, usage: { used, limit } });
+    return sendSuccess(res, {
+      items,
+      usage: { used, limit },
+      providers: getAiProviderStatus(),
+    });
   } catch (error) {
     next(error);
   }

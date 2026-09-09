@@ -21,16 +21,6 @@ export default function LoginPage() {
           </Link>
         </p>
       </div>
-      <div className="rounded-2xl border border-brand-100 bg-brand-50 p-4 text-sm text-brand-900">
-        <p className="font-bold">Admin access (full UI control)</p>
-        <p className="mt-1 text-stone-700">
-          Email: <code className="font-mono text-xs bg-white px-1.5 py-0.5 rounded border">admin@sheettomate.com</code>
-        </p>
-        <p className="mt-1 text-stone-700">
-          Password: <code className="font-mono text-xs bg-white px-1.5 py-0.5 rounded border">ChangeMe123!</code>
-        </p>
-        <p className="mt-2 text-xs text-stone-600">After login, open Admin in the header for users, templates, courses, payments, CMS, and settings.</p>
-      </div>
     </div>
   );
 }
