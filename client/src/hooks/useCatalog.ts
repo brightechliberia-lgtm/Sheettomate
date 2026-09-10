@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { TEMPLATE_CATEGORIES } from '@sheetomate/shared';
 import { api } from '../lib/api';
 
-export type LevelPrices = { BASIC: number; ADVANCED: number; EXPERT: number };
+export type LevelPrices = { FREE: number; BASIC: number; ADVANCED: number; EXPERT: number };
 
 export type CatalogConfig = {
   templateCategories: string[];
@@ -24,7 +24,7 @@ const fallback: CatalogConfig = {
   courseCategories: ['Excel basics', 'Finance & cashbooks', 'NGO & grants', 'Shop & inventory', 'Automation'],
   subscriptionPackages: [],
   templateLevelPrices: Object.fromEntries(
-    TEMPLATE_CATEGORIES.map((c) => [c, { BASIC: 4.99, ADVANCED: 9.99, EXPERT: 19.99 }]),
+    TEMPLATE_CATEGORIES.map((c) => [c, { FREE: 0, BASIC: 4.99, ADVANCED: 9.99, EXPERT: 19.99 }]),
   ),
 };
 

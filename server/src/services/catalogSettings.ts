@@ -1,7 +1,7 @@
 import { TEMPLATE_CATEGORIES } from '@sheetomate/shared';
 import { prisma } from '../config/prisma';
 
-export const TEMPLATE_LEVELS = ['BASIC', 'ADVANCED', 'EXPERT'] as const;
+export const TEMPLATE_LEVELS = ['FREE', 'BASIC', 'ADVANCED', 'EXPERT'] as const;
 export type TemplateLevel = (typeof TEMPLATE_LEVELS)[number];
 
 export type SubscriptionPackage = {
@@ -14,7 +14,18 @@ export type SubscriptionPackage = {
   active: boolean;
 };
 
-export type LevelPrices = { BASIC: number; ADVANCED: number; EXPERT: number };
+export type LevelPrices = { FREE: number; BASIC: number; ADVANCED: number; EXPERT: number };
+
+const DEFAULT_LEVEL_PRICES: LevelPrices = { FREE: 0, BASIC: 4.99, ADVANCED: 9.99, EXPERT: 19.99 };
+
+function normalizeLevelPrices(row?: Partial<LevelPrices> | null): LevelPrices {
+  return {
+    FREE: Number(row?.FREE) || 0,
+    BASIC: Number(row?.BASIC) || 0,
+    ADVANCED: Number(row?.ADVANCED) || 0,
+    EXPERT: Number(row?.EXPERT) || 0,
+  };
+}
 
 export type CatalogConfig = {
   templateCategories: string[];
@@ -37,7 +48,7 @@ const DEFAULT_COURSE_CATEGORIES = [
 function defaultLevelPrices(categories: string[]): Record<string, LevelPrices> {
   const prices: Record<string, LevelPrices> = {};
   for (const c of categories) {
-    prices[c] = { BASIC: 4.99, ADVANCED: 9.99, EXPERT: 19.99 };
+    prices[c] = { ...DEFAULT_LEVEL_PRICES };
   }
   return prices;
 }
@@ -92,11 +103,12 @@ export async function getCatalogConfig(): Promise<CatalogConfig> {
     const courseCategories =
       parsed.courseCategories?.filter((c) => typeof c === 'string' && c.trim()).map((c) => c.trim()) ??
       base.courseCategories;
-    const templateLevelPrices = { ...defaultLevelPrices(templateCategories), ...(parsed.templateLevelPrices ?? {}) };
+    const templateLevelPrices: Record<string, LevelPrices> = {};
     for (const cat of templateCategories) {
-      if (!templateLevelPrices[cat]) {
-        templateLevelPrices[cat] = { BASIC: 4.99, ADVANCED: 9.99, EXPERT: 19.99 };
-      }
+      templateLevelPrices[cat] = normalizeLevelPrices({
+        ...DEFAULT_LEVEL_PRICES,
+        ...(parsed.templateLevelPrices?.[cat] ?? {}),
+      });
     }
     return {
       templateCategories,
@@ -126,12 +138,10 @@ export async function saveCatalogConfig(config: CatalogConfig): Promise<CatalogC
     templateLevelPrices: {},
   };
   for (const cat of cleaned.templateCategories) {
-    const row = config.templateLevelPrices[cat] ?? { BASIC: 4.99, ADVANCED: 9.99, EXPERT: 19.99 };
-    cleaned.templateLevelPrices[cat] = {
-      BASIC: Number(row.BASIC) || 0,
-      ADVANCED: Number(row.ADVANCED) || 0,
-      EXPERT: Number(row.EXPERT) || 0,
-    };
+    cleaned.templateLevelPrices[cat] = normalizeLevelPrices({
+      ...DEFAULT_LEVEL_PRICES,
+      ...(config.templateLevelPrices[cat] ?? {}),
+    });
   }
   const value = JSON.stringify(cleaned);
   await prisma.platformSetting.upsert({

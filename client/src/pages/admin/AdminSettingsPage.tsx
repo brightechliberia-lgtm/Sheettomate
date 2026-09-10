@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import StaffGate from '../../admin/StaffGate';
 
-type LevelPrices = { BASIC: number; ADVANCED: number; EXPERT: number };
+type LevelPrices = { FREE: number; BASIC: number; ADVANCED: number; EXPERT: number };
 type SubscriptionPackage = {
   id: string;
   name: string;
@@ -347,6 +347,7 @@ export default function AdminSettingsPage() {
                 <thead>
                   <tr className="bg-stone-50 text-left">
                     <th className="p-3">Category</th>
+                    <th className="p-3">Free (USD)</th>
                     <th className="p-3">Basic (USD)</th>
                     <th className="p-3">Advance (USD)</th>
                     <th className="p-3">Expert (USD)</th>
@@ -354,10 +355,12 @@ export default function AdminSettingsPage() {
                 </thead>
                 <tbody>
                   {catalog.templateCategories.map((cat) => {
-                    const prices = catalog.templateLevelPrices[cat] ?? {
+                    const prices: LevelPrices = {
+                      FREE: 0,
                       BASIC: 4.99,
                       ADVANCED: 9.99,
                       EXPERT: 19.99,
+                      ...catalog.templateLevelPrices[cat],
                     };
                     const setPrice = (key: keyof LevelPrices, value: number) =>
                       setCatalog({
@@ -370,7 +373,7 @@ export default function AdminSettingsPage() {
                     return (
                       <tr key={cat} className="border-t">
                         <td className="p-3 font-medium">{cat}</td>
-                        {(['BASIC', 'ADVANCED', 'EXPERT'] as const).map((level) => (
+                        {(['FREE', 'BASIC', 'ADVANCED', 'EXPERT'] as const).map((level) => (
                           <td key={level} className="p-2">
                             <input
                               type="number"
@@ -388,7 +391,8 @@ export default function AdminSettingsPage() {
                 </tbody>
               </table>
               <p className="p-3 text-xs text-stone-500">
-                Suggested list prices by category and level (Basic / Advance / Expert). Creators see these when uploading.
+                Suggested list prices by category and level (Free / Basic / Advance / Expert). Creators see these when
+                uploading. Use 0 for Free.
               </p>
             </div>
           )}

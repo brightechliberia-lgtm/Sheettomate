@@ -5,6 +5,7 @@ import { useCatalog } from '../hooks/useCatalog';
 import { useCurrency } from '../context/CurrencyContext';
 
 const LEVELS = [
+  { id: 'FREE', label: 'Free' },
   { id: 'BASIC', label: 'Basic' },
   { id: 'ADVANCED', label: 'Advance' },
   { id: 'EXPERT', label: 'Expert' },
