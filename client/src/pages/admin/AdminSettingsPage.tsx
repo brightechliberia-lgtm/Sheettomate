@@ -355,12 +355,12 @@ export default function AdminSettingsPage() {
                 </thead>
                 <tbody>
                   {catalog.templateCategories.map((cat) => {
+                    const saved = catalog.templateLevelPrices[cat];
                     const prices: LevelPrices = {
-                      FREE: 0,
-                      BASIC: 4.99,
-                      ADVANCED: 9.99,
-                      EXPERT: 19.99,
-                      ...catalog.templateLevelPrices[cat],
+                      FREE: saved?.FREE ?? 0,
+                      BASIC: saved?.BASIC ?? 4.99,
+                      ADVANCED: saved?.ADVANCED ?? 9.99,
+                      EXPERT: saved?.EXPERT ?? 19.99,
                     };
                     const setPrice = (key: keyof LevelPrices, value: number) =>
                       setCatalog({
